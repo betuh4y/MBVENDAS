@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistema de Vendas (PDV) - Batavo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/jspdf-autotable@3.8.0/dist/jspdf.plugin.autotable.js"></script>
+    <style>
+      /* Estilos mantidos do código original, com adição para clientes */
+      .client-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .client-list-item button {
+        width: auto;
+        padding: 8px;
+        font-size: 0.9em;
+      }
+
+      .client-sales {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+      }
+
+      /* Ajustes para responsividade */
+      @media (max-width: 600px) {
+        .client-list-item span {
+          font-size: 0.8em;
+        }
+
+        .client-list-item button {
+          font-size: 0.8em;
+          padding: 6px;
+        }
+      }
+    </style>
+    <script type="text/javascript" src="./index.js" defer=""></script>
+    <link rel="stylesheet" href="./index.css">
+  </head>
+
+  <body>
+    <header>
+      <a href="https://ibb.co/7dV11YHH">
+        <img src="https://pbs.twimg.com/media/GwGcjEdWIAAA4bp?format=png&amp;name=small" alt="Batavo Logo">
+      </a>
+    </header>
+
+    <div id="authSection">
+      <h3>Login / Cadastro</h3>
+      <input type="email" id="email" placeholder="Email">
+      <input type="password" id="password" placeholder="Senha">
+      <button id="registerBtn">Cadastrar</button>
+      <button id="loginBtn">Entrar</button>
+    </div>
+
+    <div id="saleSection" style="display:none;">
+      <button id="logoutBtn">Sair</button>
+      <hr>
+      <h3>Nova Venda</h3>
+      <div class="filters">
+        <select id="filterCategorySale">
+          <option value="Todas">Todas as Categorias</option>
+        </select>
+        <select id="selectClientSale">
+          <option value="">Sem Cliente</option>
+        </select>
+        <input type="text" id="barcodeInput" placeholder="Gramatura (150 *) ou Código (2#123456)">
+      </div>
+      <p>Pressione <strong>Enter</strong> após inserir gramatura (ex.: 150 *), quantidade#código (ex.: 2#123456) ou código, ou selecione produtos abaixo.</p>
+      <div id="productSelection">
+        <p>Selecione uma categoria para visualizar os produtos.</p>
+      </div>
+      <div id="activeSaleItems">
+        <p>Nenhum item adicionado.</p>
+      </div>
+      <div id="currentSaleTotal">Total: R$ 0,00</div>
+      <div id="saleActions">
+        <button id="finalizarVendaBtn" disabled="">Finalizar Venda</button>
+        <button id="cancelSaleBtn">Cancelar Venda</button>
+      </div>
+
+      <div id="paymentModal" class="modal">
+        <div class="modal-content">
+          <span class="close-button">×</span>
+          <h3>Finalizar Venda</h3>
+          <p><strong>Cliente:</strong> <span id="modalClientName">Sem Cliente</span></p>
+          <p><strong>Total:</strong> <span id="modalTotalValue">R$ 0,00</span></p>
+          <label>Desconto (R$ ou %):</label>
+          <input type="text" id="discountInput" placeholder="Ex: 10 ou 10%">
+          <p><strong>Total com Desconto:</strong> <span id="modalTotalWithDiscount">R$ 0,00</span></p>
+          <label>Forma de Pagamento:</label>
+          <select id="modalPaymentType">
+            <option value="Pix">Pix</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="Credito">Crédito</option>
+            <option value="Debito">Débito</option>
+            <option value="Outro">Outro</option>
+          </select>
+          <div id="amountGivenContainer" style="display:none;">
+            <label>Valor Recebido:</label>
+            <input type="number" id="amountGiven" placeholder="Valor pago" step="0.01">
+            <p>Troco: <span id="changeDue">R$ 0,00</span></p>
+          </div>
+          <button id="confirmPaymentBtn">Confirmar Pagamento</button>
+        </div>
+      </div>
+
+      <hr>
+      <h3>Gerenciar Categorias</h3>
+      <input type="text" id="newCategoryName" placeholder="Nome da Categoria">
+      <button id="addCategoryBtn">Salvar Categoria</button>
+      <div id="categoryList">
+        <p>Nenhuma categoria cadastrada.</p>
+      </div>
+
+      <hr>
+      <h3>Gerenciar Clientes</h3>
+      <input type="text" id="newClientName" placeholder="Nome do Cliente">
+      <input type="text" id="newClientCpfCnpj" placeholder="CPF ou CNPJ">
+      <input type="text" id="newClientPhone" placeholder="Telefone (ex.: 5519987654321)">
+      <input type="text" id="newClientEmail" placeholder="Email (opcional)">
+      <button id="addClientBtn">Salvar Cliente</button>
+      <div id="clientList">
+        <p>Nenhum cliente cadastrado.</p>
+      </div>
+
+      <hr>
+      <h3>Cadastrar Produto</h3>
+      <input type="text" id="newProductBarcode" placeholder="Código de Barras">
+      <input type="text" id="newProductName" placeholder="Nome do Produto">
+      <input type="number" id="newProductPrice" placeholder="Preço (R$)" step="0.01">
+      <select id="newProductUnit">
+        <option value="unidade">Unidade</option>
+        <option value="kilo">Kilo</option>
+      </select>
+      <select id="newProductCategory">
+        <option value="">Selecione uma Categoria</option>
+      </select>
+      <input type="number" id="newProductStock" placeholder="Estoque (un/kg)" step="0.001">
+      <button id="addProductBtn">Salvar Produto</button>
+
+      <hr>
+      <h3>Produtos</h3>
+      <button id="toggleProductListBtn">Mostrar Produtos</button>
+      <div id="productList" style="display:none;">
+        <p>Nenhum produto cadastrado.</p>
+      </div>
+
+      <hr>
+      <h3>Venda Manual</h3>
+      <input type="datetime-local" id="dataVenda" required="">
+      <select id="selectClientManualSale">
+        <option value="">Sem Cliente</option>
+      </select>
+      <input type="number" id="valorTotal" placeholder="Valor Total (R$)" step="0.01" required="">
+      <select id="tipoPagamento">
+        <option value="Pix">Pix</option>
+        <option value="Dinheiro">Dinheiro</option>
+        <option value="Credito">Crédito</option>
+        <option value="Debito">Débito</option>
+        <option value="Outro">Outro</option>
+      </select>
+      <textarea id="observacoes" placeholder="Observações"></textarea>
+      <button id="submitSale">Salvar Venda</button>
+
+      <hr>
+      <h3>Filtrar Vendas</h3>
+      <div class="filters">
+        <input type="date" id="filterDateStart">
+        <input type="date" id="filterDateEnd">
+        <select id="filterPaymentType">
+          <option value="Todos">Todos</option>
+          <option value="Pix">Pix</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Credito">Crédito</option>
+          <option value="Debito">Débito</option>
+          <option value="Outro">Outro</option>
+        </select>
+        <select id="filterClient">
+          <option value="Todos">Todos os Clientes</option>
+        </select>
+        <button id="applyFiltersBtn">Filtrar</button>
+      </div>
+
+      <hr>
+      <h3>Lista de Clientes</h3>
+      <div id="clientSalesList">
+        <p>Nenhum cliente cadastrado.</p>
+      </div>
+
+      <hr>
+      <h3>Ranking de Produtos</h3>
+      <div id="rankingList">
+        <p>Nenhum dado de vendas.</p>
+      </div>
+      <button id="exportRankingPdfBtn">Baixar Ranking (PDF)</button>
+
+      <hr>
+      <h3>Exportar Relatórios</h3>
+      <button id="exportPdfBtn">Vendas (PDF)</button>
+      <button id="exportExcelBtn">Vendas (Excel)</button>
+      <button id="exportStockPdfBtn">Estoque (PDF)</button>
+
+      <hr>
+      <h3>Enviar Relatório</h3>
+      <input type="text" id="phoneNumber" placeholder="Número (Ex: 5511987654321)">
+      <button id="sendReportBtn">Enviar Relatório</button>
+
+      <hr>
+      <h3>Suas Vendas</h3>
+      <div class="total-sales">Total: <span id="totalSalesValue">R$ 0,00</span></div>
+      <div id="saleList"></div>
+    </div>
+
+    <script type="module">
+      import {
+        initializeApp
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import {
+        getAuth,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        onAuthStateChanged,
+        signOut
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+      import {
+        getDatabase,
+        ref,
+        push,
+        set,
+        update,
+        onValue,
+        remove
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDJBdK9I-jtg9ujTc9Xsxr-hnPfkId4wIU",
+        authDomain: "pdv1-77632.firebaseapp.com",
+        databaseURL: "https://pdv1-77632-default-rtdb.firebaseio.com",
+        projectId: "pdv1-77632",
+        storageBucket: "pdv1-77632.firebasestorage.app",
+        messagingSenderId: "246033791117",
+        appId: "1:246033791117:web:7b70b511ea8d8c5ba1cac4",
+        measurementId: "G-NTG13SG6VM"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth();
+      const db = getDatabase();
+
+      let editId = null;
+      let allSalesData = [];
+      let filteredSalesData = [];
+      let activeSaleItems = [];
+      let productsDatabase = {};
+      let categoriesDatabase = {};
+      let clientsDatabase = {};
+      let tempWeight = null;
+      let appliedDiscount = 0;
+      let selectedCategory = "Todas";
+      let selectedClient = "";
+
+      document.getElementById("barcodeInput").focus();
+
+      function updateDataVenda() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById("dataVenda").value = `${year}-${month}-${day}T${hours}:${minutes}`;
+      }
+
+      // Autenticação (mantida como no original)
+      document.getElementById("registerBtn").onclick = () => {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        createUserWithEmailAndPassword(auth, email, password)
+          .then(() => alert("Usuário registrado!"))
+          .catch(err => alert(err.message));
+      };
+
+      document.getElementById("loginBtn").onclick = () => {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        signInWithEmailAndPassword(auth, email, password)
+          .then(() => {
+            alert("Login realizado!");
+            loadProductsFromDatabase();
+            loadCategoriesFromDatabase();
+            loadClientsFromDatabase();
+          })
+          .catch(err => alert(err.message));
+      };
+
+      document.getElementById("logoutBtn").onclick = () => {
+        signOut(auth);
+      };
+
+      onAuthStateChanged(auth, user => {
+        if (user) {
+          document.getElementById("authSection").style.display = "none";
+          document.getElementById("saleSection").style.display = "block";
+          loadAllSalesAndFilter(user.uid);
+          updateDataVenda();
+          const today = new Date().toISOString().split('T')[0];
+          document.getElementById("filterDateStart").value = today;
+          document.getElementById("filterDateEnd").value = today;
+          cancelActiveSale();
+          loadProductsFromDatabase();
+          loadCategoriesFromDatabase();
+          loadClientsFromDatabase();
+        } else {
+          document.getElementById("authSection").style.display = "block";
+          document.getElementById("saleSection").style.display = "none";
+        }
+      });
+
+      // Gerenciamento de Categorias (mantido como no código anterior)
+      function loadCategoriesFromDatabase() {
+        const user = auth.currentUser;
+        if (user) {
+          const categoriesRef = ref(db, `categorias/${user.uid}`);
+          onValue(categoriesRef, snapshot => {
+            categoriesDatabase = snapshot.exists() ? snapshot.val() : {};
+            updateCategorySelect();
+            displayCategories();
+            updateProductSelection();
+          }, {
+            onlyOnce: false
+          });
+        }
+      }
+
+      function updateCategorySelect() {
+        const categorySelect = document.getElementById("newProductCategory");
+        const filterCategorySale = document.getElementById("filterCategorySale");
+        categorySelect.innerHTML = '<option value="">Selecione uma Categoria</option>' +
+          Object.entries(categoriesDatabase).map(([id, category]) =>
+            `<option value="${id}">${category.nome}</option>`
+          ).join('');
+        filterCategorySale.innerHTML = '<option value="Todas">Todas as Categorias</option>' +
+          Object.entries(categoriesDatabase).map(([id, category]) =>
+            `<option value="${id}">${category.nome}</option>`
+          ).join('');
+      }
+
+      function displayCategories() {
+        const categoryListDiv = document.getElementById("categoryList");
+        categoryListDiv.innerHTML = Object.keys(categoriesDatabase).length === 0 ?
+          "<p>Nenhuma categoria cadastrada.</p>" :
+          Object.entries(categoriesDatabase).map(([id, category]) => `
+          <div class="category-list-item">
+            <span>${category.nome}</span>
+            <div>
+              <button onclick="editCategory('${id}')">Editar</button>
+              <button onclick="deleteCategory('${id}')">Excluir</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById("addCategoryBtn").onclick = () => {
+        const categoryName = document.getElementById("newCategoryName").value.trim();
+        if (!categoryName) {
+          alert("Preencha o nome da categoria.");
+          return;
+        }
+        const user = auth.currentUser;
+        if (user) {
+          const categoryRef = editId ?
+            ref(db, `categorias/${user.uid}/${editId}`) :
+            push(ref(db, `categorias/${user.uid}`));
+          set(categoryRef, {
+              nome: categoryName
+            })
+            .then(() => {
+              alert(editId ? "Categoria atualizada!" : "Categoria salva!");
+              document.getElementById("newCategoryName").value = "";
+              editId = null;
+              document.getElementById("addCategoryBtn").textContent = "Salvar Categoria";
+            })
+            .catch(err => alert("Erro ao salvar categoria: " + err.message));
+        }
+      };
+
+      window.editCategory = id => {
+        const category = categoriesDatabase[id];
+        if (category) {
+          document.getElementById("newCategoryName").value = category.nome;
+          editId = id;
+          document.getElementById("addCategoryBtn").textContent = "Atualizar Categoria";
+        }
+      };
+
+      window.deleteCategory = id => {
+        if (confirm(`Excluir categoria ${categoriesDatabase[id].nome}?`)) {
+          const user = auth.currentUser;
+          if (user) {
+            const hasProducts = Object.values(productsDatabase).some(p => p.categoria === id);
+            if (hasProducts) {
+              alert("Não é possível excluir: há produtos associados a esta categoria.");
+              return;
+            }
+            remove(ref(db, `categorias/${user.uid}/${id}`))
+              .then(() => alert("Categoria excluída!"))
+              .catch(err => alert("Erro ao excluir: " + err.message));
+          }
+        }
+      };
+
+      // Gerenciamento de Clientes
+      function loadClientsFromDatabase() {
+        const user = auth.currentUser;
+        if (user) {
+          const clientsRef = ref(db, `clientes/${user.uid}`);
+          onValue(clientsRef, snapshot => {
+            clientsDatabase = snapshot.exists() ? snapshot.val() : {};
+            updateClientSelect();
+            displayClients();
+          }, {
+            onlyOnce: false
+          });
+        }
+      }
+
+      function updateClientSelect() {
+        const selectClientSale = document.getElementById("selectClientSale");
+        const selectClientManualSale = document.getElementById("selectClientManualSale");
+        const filterClient = document.getElementById("filterClient");
+        const clientOptions = '<option value="">Sem Cliente</option>' +
+          Object.entries(clientsDatabase).map(([id, client]) =>
+            `<option value="${id}">${client.nome}</option>`
+          ).join('');
+        selectClientSale.innerHTML = clientOptions;
+        selectClientManualSale.innerHTML = clientOptions;
+        filterClient.innerHTML = '<option value="Todos">Todos os Clientes</option>' +
+          Object.entries(clientsDatabase).map(([id, client]) =>
+            `<option value="${id}">${client.nome}</option>`
+          ).join('');
+      }
+
+      function displayClients() {
+        const clientListDiv = document.getElementById("clientList");
+        clientListDiv.innerHTML = Object.keys(clientsDatabase).length === 0 ?
+          "<p>Nenhum cliente cadastrado.</p>" :
+          Object.entries(clientsDatabase).map(([id, client]) => `
+          <div class="client-list-item">
+            <span>${client.nome} (${client.cpfCnpj})</span>
+            <div>
+              <button onclick="editClient('${id}')">Editar</button>
+              <button onclick="deleteClient('${id}')">Excluir</button>
+            </div>
+          </div>
+        `).join('');
+
+        const clientSalesListDiv = document.getElementById("clientSalesList");
+        clientSalesListDiv.innerHTML = Object.keys(clientsDatabase).length === 0 ?
+          "<p>Nenhum cliente cadastrado.</p>" :
+          Object.entries(clientsDatabase).map(([id, client]) => {
+            const clientSales = allSalesData.filter(sale => sale.clienteId === id);
+            return `
+            <div class="client-list-item">
+              <div>
+                <strong>${client.nome}</strong> (${client.cpfCnpj})<br>
+                Telefone: ${client.telefone || 'N/A'} | Email: ${client.email || 'N/A'}
+                <div class="client-sales">
+                  <strong>Vendas (${clientSales.length}):</strong>
+                  ${clientSales.length === 0 ? '<p>Nenhuma venda associada.</p>' : 
+                    clientSales.map(sale => `
+                      <div>
+                        Data: ${new Date(sale.dataVenda).toLocaleString('pt-BR')}<br>
+                        Valor: R$ ${sale.valorTotal.toFixed(2).replace('.', ',')}<br>
+                        Pagamento: ${sale.tipoPagamento}<br>
+                        ${sale.desconto > 0 ? `Desconto: R$ ${sale.desconto.toFixed(2).replace('.', ',')}<br>` : ''}
+                        ${sale.items?.length > 0 ? `Itens: <ul>${sale.items.map(i => `<li>${i.nome} (${i.unidade === 'kilo' ? (i.quantidade * 1000).toFixed(0) + 'g' : i.quantidade + ' un'}, R$ ${i.preco.toFixed(2).replace('.', ',')})</li>`).join('')}</ul>` : ''}
+                      </div>
+                    `).join('')}
+                </div>
+              </div>
+            </div>
+          `;
+          }).join('');
+      }
+
+      document.getElementById("addClientBtn").onclick = () => {
+        const name = document.getElementById("newClientName").value.trim();
+        const cpfCnpj = document.getElementById("newClientCpfCnpj").value.trim();
+        const phone = document.getElementById("newClientPhone").value.trim();
+        const email = document.getElementById("newClientEmail").value.trim();
+
+        if (!name || !cpfCnpj) {
+          alert("Preencha nome e CPF/CNPJ do cliente.");
+          return;
+        }
+
+        const user = auth.currentUser;
+        if (user) {
+          const clientRef = editId ?
+            ref(db, `clientes/${user.uid}/${editId}`) :
+            push(ref(db, `clientes/${user.uid}`));
+          const clientData = {
+            nome: name,
+            cpfCnpj: cpfCnpj,
+            telefone: phone || null,
+            email: email || null
+          };
+          set(clientRef, clientData)
+            .then(() => {
+              alert(editId ? "Cliente atualizado!" : "Cliente salvo!");
+              document.getElementById("newClientName").value = "";
+              document.getElementById("newClientCpfCnpj").value = "";
+              document.getElementById("newClientPhone").value = "";
+              document.getElementById("newClientEmail").value = "";
+              editId = null;
+              document.getElementById("addClientBtn").textContent = "Salvar Cliente";
+            })
+            .catch(err => alert("Erro ao salvar cliente: " + err.message));
+        }
+      };
+
+      window.editClient = id => {
+        const client = clientsDatabase[id];
+        if (client) {
+          document.getElementById("newClientName").value = client.nome;
+          document.getElementById("newClientCpfCnpj").value = client.cpfCnpj;
+          document.getElementById("newClientPhone").value = client.telefone || "";
+          document.getElementById("newClientEmail").value = client.email || "";
+          editId = id;
+          document.getElementById("addClientBtn").textContent = "Atualizar Cliente";
+        }
+      };
+
+      window.deleteClient = id => {
+        if (confirm(`Excluir cliente ${clientsDatabase[id].nome}?`)) {
+          const user = auth.currentUser;
+          if (user) {
+            const hasSales = allSalesData.some(sale => sale.clienteId === id);
+            if (hasSales) {
+              alert("Não é possível excluir: há vendas associadas a este cliente.");
+              return;
+            }
+            remove(ref(db, `clientes/${user.uid}/${id}`))
+              .then(() => alert("Cliente excluído!"))
+              .catch(err => alert("Erro ao excluir: " + err.message));
+          }
+        }
+      };
+
+      // Produtos (mantido com ajustes para categoria)
+      function loadProductsFromDatabase() {
+        const user = auth.currentUser;
+        if (user) {
+          const produtosRef = ref(db, `produtos/${user.uid}`);
+          onValue(produtosRef, snapshot => {
+            productsDatabase = snapshot.exists() ? snapshot.val() : {};
+            displayProducts();
+            updateRankingDisplay();
+            updateProductSelection();
+          }, {
+            onlyOnce: false
+          });
+        }
+      }
+
+      document.getElementById("addProductBtn").onclick = () => {
+        const barcode = document.getElementById("newProductBarcode").value.trim();
+        const name = document.getElementById("newProductName").value.trim();
+        const price = parseFloat(document.getElementById("newProductPrice").value);
+        const unit = document.getElementById("newProductUnit").value;
+        const category = document.getElementById("newProductCategory").value;
+        const stock = parseFloat(document.getElementById("newProductStock").value) || 0;
+
+        if (!barcode || !name || isNaN(price) || price <= 0 || !category) {
+          alert("Preencha todos os campos do produto, incluindo a categoria.");
+          return;
+        }
+
+        if (stock < 0) {
+          alert("Estoque não pode ser negativo.");
+          return;
+        }
+
+        const user = auth.currentUser;
+        if (user) {
+          const productRef = ref(db, `produtos/${user.uid}/${barcode}`);
+          onValue(productRef, snapshot => {
+            if (snapshot.exists() && !confirm(`Produto com código ${barcode} já existe. Deseja atualizá-lo?`)) {
+              return;
+            }
+            const productData = {
+              nome: name,
+              preco: price,
+              unidade: unit,
+              categoria: category,
+              estoque: stock
+            };
+            set(productRef, productData)
+              .then(() => {
+                alert("Produto salvo!");
+                resetProductForm();
+              })
+              .catch(err => alert("Erro ao salvar produto: " + err.message));
+          }, {
+            onlyOnce: true
+          });
+        }
+      };
+
+      function resetProductForm() {
+        document.getElementById("newProductBarcode").value = "";
+        document.getElementById("newProductName").value = "";
+        document.getElementById("newProductPrice").value = "";
+        document.getElementById("newProductUnit").value = "unidade";
+        document.getElementById("newProductCategory").value = "";
+        document.getElementById("newProductStock").value = "";
+        document.getElementById("newProductBarcode").disabled = false;
+        document.getElementById("addProductBtn").textContent = "Salvar Produto";
+      }
+
+      function displayProducts() {
+        const productListDiv = document.getElementById("productList");
+        productListDiv.innerHTML = Object.keys(productsDatabase).length === 0 ?
+          "<p>Nenhum produto cadastrado.</p>" :
+          `<table>
+           <thead>
+             <tr>
+               <th>Código</th>
+               <th>Nome</th>
+               <th>Preço</th>
+               <th>Unidade</th>
+               <th>Categoria</th>
+               <th>Estoque</th>
+               <th>Ações</th>
+             </tr>
+           </thead>
+           <tbody>
+             ${Object.entries(productsDatabase).map(([barcode, product]) => `
+               <tr class="${(product.estoque || 0) < (product.unidade === 'kilo' ? 0.1 : 1) ? 'low-stock' : ''}">
+                 <td>${barcode}</td>
+                 <td>${product.nome}</td>
+                 <td>R$ ${product.preco.toFixed(2).replace('.', ',')}</td>
+                 <td>${product.unidade === 'kilo' ? 'Kilo' : 'Unidade'}</td>
+                 <td>${categoriesDatabase[product.categoria]?.nome || 'Sem categoria'}</td>
+                 <td>${(product.estoque || 0).toFixed(3).replace('.', ',')} ${product.unidade === 'kilo' ? 'kg' : 'un'}</td>
+                 <td>
+                   <button onclick="editProduct('${barcode}')">Editar</button>
+                   <button onclick="deleteProduct('${barcode}')">Excluir</button>
+                 </td>
+               </tr>
+             `).join('')}
+           </tbody>
+         </table>`;
+      }
+
+      window.editProduct = barcode => {
+        const product = productsDatabase[barcode];
+        if (product) {
+          document.getElementById("newProductBarcode").value = barcode;
+          document.getElementById("newProductName").value = product.nome;
+          document.getElementById("newProductPrice").value = product.preco;
+          document.getElementById("newProductUnit").value = product.unidade;
+          document.getElementById("newProductCategory").value = product.categoria;
+          document.getElementById("newProductStock").value = product.estoque || 0;
+          document.getElementById("newProductBarcode").disabled = true;
+          document.getElementById("addProductBtn").textContent = "Atualizar Produto";
+        }
+      };
+
+      window.deleteProduct = barcode => {
+        if (confirm(`Excluir produto com código ${barcode}?`)) {
+          const user = auth.currentUser;
+          if (user) {
+            remove(ref(db, `produtos/${user.uid}/${barcode}`))
+              .then(() => alert("Produto excluído!"))
+              .catch(err => alert("Erro ao excluir: " + err.message));
+          }
+        }
+      };
+
+      document.getElementById("toggleProductListBtn").onclick = () => {
+        const productListDiv = document.getElementById("productList");
+        const toggleBtn = document.getElementById("toggleProductListBtn");
+        productListDiv.style.display = productListDiv.style.display === "none" ? "block" : "none";
+        toggleBtn.textContent = productListDiv.style.display === "none" ? "Mostrar Produtos" : "Ocultar Produtos";
+      };
+
+      function updateProductSelection() {
+        const productSelectionDiv = document.getElementById("productSelection");
+        const filteredProducts = selectedCategory === "Todas" ?
+          Object.entries(productsDatabase) :
+          Object.entries(productsDatabase).filter(([_, product]) => product.categoria === selectedCategory);
+
+        productSelectionDiv.innerHTML = filteredProducts.length === 0 ?
+          "<p>Nenhum produto encontrado para esta categoria.</p>" :
+          filteredProducts.map(([barcode, product]) => `
+          <div class="product-card">
+            <h4>${product.nome}</h4>
+            <p>R$ ${product.preco.toFixed(2).replace('.', ',')} / ${product.unidade === 'kilo' ? 'kg' : 'un'}</p>
+            <p>Estoque: ${(product.estoque || 0).toFixed(3).replace('.', ',')} ${product.unidade === 'kilo' ? 'kg' : 'un'}</p>
+            <div class="quantity-controls">
+              <button onclick="adjustQuantity('${barcode}', -1)">−</button>
+              <input type="number" id="qty-${barcode}" value="0" min="0" step="${product.unidade === 'kilo' ? '0.001' : '1'}">
+              <button onclick="adjustQuantity('${barcode}', 1)">+</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      window.adjustQuantity = (barcode, delta) => {
+        const input = document.getElementById(`qty-${barcode}`);
+        const product = productsDatabase[barcode];
+        let newQty = parseFloat(input.value) + delta * (product.unidade === 'kilo' ? 0.001 : 1);
+        if (newQty < 0) newQty = 0;
+        if (newQty > product.estoque) {
+          alert("Quantidade excede o estoque disponível.");
+          return;
+        }
+        input.value = newQty.toFixed(product.unidade === 'kilo' ? 3 : 0);
+        updateActiveSaleFromSelection(barcode, newQty);
+      };
+
+      function updateActiveSaleFromSelection(barcode, quantidade) {
+        const product = productsDatabase[barcode];
+        if (!product) return;
+
+        activeSaleItems = activeSaleItems.filter(item => item.codigo !== barcode);
+
+        if (quantidade > 0) {
+          const preco = product.preco * quantidade;
+          activeSaleItems.push({
+            numero: activeSaleItems.length + 1,
+            codigo: barcode,
+            nome: product.nome,
+            preco: preco,
+            quantidade: quantidade,
+            unidade: product.unidade,
+            categoria: product.categoria
+          });
+        }
+
+        updateActiveSaleDisplay();
+        document.getElementById("barcodeInput").focus();
+      }
+
+      document.getElementById("barcodeInput").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          const input = this.value.trim();
+          if (input) {
+            if (input.endsWith('*') && !tempWeight) {
+              const weight = parseFloat(input.slice(0, -1)) / 1000;
+              if (isNaN(weight) || weight <= 0) {
+                alert("Gramatura inválida (ex.: 150 *).");
+                return;
+              }
+              tempWeight = weight;
+              alert(`Gramatura ${weight * 1000}g registrada. Digite o código.`);
+              this.value = "";
+              this.placeholder = "Digite o código do produto";
+              setTimeout(() => {
+                if (tempWeight) {
+                  tempWeight = null;
+                  this.placeholder = "Gramatura (150 *) ou Código (2#123456)";
+                  alert("Tempo esgotado. Insira a gramatura novamente.");
+                }
+              }, 30000);
+            } else {
+              let barcode = input;
+              let quantidade = 1;
+              if (input.includes('#')) {
+                const [qty, code] = input.split('#');
+                quantidade = parseInt(qty);
+                barcode = code.trim();
+                if (isNaN(quantidade) || quantidade <= 0 || !code) {
+                  alert("Formato inválido (ex.: 2#123456).");
+                  this.value = "";
+                  return;
+                }
+              }
+              addItemToActiveSale(barcode, quantidade);
+              this.value = "";
+              this.placeholder = "Gramatura (150 *) ou Código (2#123456)";
+            }
+            this.focus();
+          }
+        }
+      });
+
+      function addItemToActiveSale(barcode, quantidade = 1) {
+        let product = productsDatabase[barcode];
+        let preco;
+
+        if (tempWeight) {
+          if (!product || product.unidade !== 'kilo') {
+            alert(`Produto ${barcode} não encontrado ou não é por peso.`);
+            tempWeight = null;
+            document.getElementById("barcodeInput").placeholder = "Gramatura (150 *) ou Código (2#123456)";
+            return;
+          }
+          quantidade = tempWeight;
+          preco = product.preco * quantidade;
+          tempWeight = null;
+        } else if (barcode.startsWith('2') && barcode.length === 13) {
+          const productCode = barcode.slice(1, 7);
+          product = productsDatabase[productCode];
+          if (!product || product.unidade !== 'kilo') {
+            alert(`Produto ${productCode} não encontrado ou não é por peso.`);
+            return;
+          }
+          const priceCents = parseInt(barcode.slice(7, 12));
+          preco = priceCents / 100;
+          quantidade = preco / product.preco;
+        } else {
+          if (!product || product.unidade === 'kilo') {
+            alert(`Produto ${barcode} não encontrado ou requer peso.`);
+            return;
+          }
+          preco = product.preco * quantidade;
+        }
+
+        if (quantidade > product.estoque) {
+          alert("Quantidade excede o estoque disponível.");
+          return;
+        }
+
+        activeSaleItems = activeSaleItems.filter(item => item.codigo !== barcode);
+        activeSaleItems.push({
+          numero: activeSaleItems.length + 1,
+          codigo: barcode,
+          nome: product.nome,
+          preco: preco,
+          quantidade: quantidade,
+          unidade: product.unidade,
+          categoria: product.categoria
+        });
+        updateActiveSaleDisplay();
+        updateProductSelection();
+        document.getElementById(`qty-${barcode}`).value = quantidade.toFixed(product.unidade === 'kilo' ? 3 : 0);
+        document.getElementById("barcodeInput").focus();
+      }
+
+      window.removeItemFromActiveSale = itemNumber => {
+        const item = activeSaleItems.find(item => item.numero === itemNumber);
+        if (item) {
+          document.getElementById(`qty-${item.codigo}`).value = "0";
+        }
+        activeSaleItems = activeSaleItems.filter(item => item.numero !== itemNumber).map((item, index) => ({
+          ...item,
+          numero: index + 1
+        }));
+        updateActiveSaleDisplay();
+        document.getElementById("barcodeInput").focus();
+      };
+
+      function updateActiveSaleDisplay() {
+        const itemListDiv = document.getElementById("activeSaleItems");
+        const total = activeSaleItems.reduce((sum, item) => sum + item.preco, 0);
+        itemListDiv.innerHTML = activeSaleItems.length === 0 ?
+          "<p>Nenhum item adicionado.</p>" :
+          activeSaleItems.map(item => `
+          <div class="sale-item">
+            <span>${item.numero}. ${item.nome} (${item.unidade === 'kilo' ? (item.quantidade * 1000).toFixed(0) + 'g' : item.quantidade + ' un'}) - R$ ${item.preco.toFixed(2).replace('.', ',')}</span>
+            <button class="remove-item-btn" onclick="removeItemFromActiveSale(${item.numero})">X</button>
+          </div>
+        `).join('');
+        document.getElementById("currentSaleTotal").textContent = `Total: R$ ${total.toFixed(2).replace('.', ',')}`;
+        document.getElementById("finalizarVendaBtn").disabled = activeSaleItems.length === 0;
+      }
+
+      document.getElementById("filterCategorySale").onchange = function() {
+        selectedCategory = this.value;
+        updateProductSelection();
+      };
+
+      document.getElementById("selectClientSale").onchange = function() {
+        selectedClient = this.value;
+        document.getElementById("modalClientName").textContent = selectedClient ? clientsDatabase[selectedClient]?.nome || "Sem Cliente" : "Sem Cliente";
+      };
+
+      document.getElementById("finalizarVendaBtn").onclick = () => {
+        if (activeSaleItems.length === 0) {
+          alert("Adicione itens à venda.");
+          return;
+        }
+        updateDataVenda();
+        const total = activeSaleItems.reduce((sum, item) => sum + item.preco, 0);
+        appliedDiscount = 0;
+        document.getElementById("modalTotalValue").textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        document.getElementById("modalTotalWithDiscount").textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        document.getElementById("modalClientName").textContent = selectedClient ? clientsDatabase[selectedClient]?.nome || "Sem Cliente" : "Sem Cliente";
+        document.getElementById("discountInput").value = "";
+        document.getElementById("paymentModal").style.display = "block";
+        document.getElementById("amountGivenContainer").style.display = "none";
+        document.getElementById("modalPaymentType").value = "Pix";
+      };
+
+      document.querySelector(".close-button").onclick = () => {
+        document.getElementById("paymentModal").style.display = "none";
+        tempWeight = null;
+        appliedDiscount = 0;
+        document.getElementById("barcodeInput").placeholder = "Gramatura (150 *) ou Código (2#123456)";
+        document.getElementById("barcodeInput").focus();
+      };
+
+      document.getElementById("modalPaymentType").onchange = function() {
+        document.getElementById("amountGivenContainer").style.display = this.value === "Dinheiro" ? "block" : "none";
+        document.getElementById("changeDue").textContent = "R$ 0,00";
+        document.getElementById("amountGiven").value = "";
+      };
+
+      document.getElementById("discountInput").oninput = function() {
+        const total = activeSaleItems.reduce((sum, item) => sum + item.preco, 0);
+        const discountInput = this.value.trim();
+        let discountValue = 0;
+
+        if (discountInput) {
+          if (discountInput.endsWith("%")) {
+            const percentage = parseFloat(discountInput.slice(0, -1));
+            if (!isNaN(percentage) && percentage >= 0 && percentage <= 100) {
+              discountValue = (total * percentage) / 100;
+            } else {
+              alert("Percentual inválido (0-100).");
+              this.value = "";
+              discountValue = 0;
+            }
+          } else {
+            discountValue = parseFloat(discountInput.replace(',', '.'));
+            if (isNaN(discountValue) || discountValue < 0) {
+              alert("Desconto inválido.");
+              this.value = "";
+              discountValue = 0;
+            }
+          }
+        }
+
+        appliedDiscount = discountValue;
+        const totalWithDiscount = total - discountValue;
+        if (totalWithDiscount < 0) {
+          alert("Desconto não pode ser maior que o total.");
+          this.value = "";
+          appliedDiscount = 0;
+          document.getElementById("modalTotalWithDiscount").textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        } else {
+          document.getElementById("modalTotalWithDiscount").textContent = `R$ ${totalWithDiscount.toFixed(2).replace('.', ',')}`;
+        }
+
+        if (document.getElementById("modalPaymentType").value === "Dinheiro") {
+          const amountGiven = parseFloat(document.getElementById("amountGiven").value) || 0;
+          const change = amountGiven - totalWithDiscount;
+          document.getElementById("changeDue").textContent = `R$ ${change.toFixed(2).replace('.', ',')}`;
+          document.getElementById("confirmPaymentBtn").disabled = amountGiven < totalWithDiscount;
+        }
+      };
+
+      document.getElementById("amountGiven").oninput = function() {
+        const total = activeSaleItems.reduce((sum, item) => sum + item.preco, 0);
+        const totalWithDiscount = total - appliedDiscount;
+        const amountGiven = parseFloat(this.value) || 0;
+        const change = amountGiven - totalWithDiscount;
+        document.getElementById("changeDue").textContent = `R$ ${change.toFixed(2).replace('.', ',')}`;
+        document.getElementById("confirmPaymentBtn").disabled = amountGiven < totalWithDiscount;
+      };
+
+      document.getElementById("confirmPaymentBtn").onclick = () => {
+        const total = activeSaleItems.reduce((sum, item) => sum + item.preco, 0);
+        const totalWithDiscount = total - appliedDiscount;
+        const paymentType = document.getElementById("modalPaymentType").value;
+        const amountGiven = parseFloat(document.getElementById("amountGiven").value) || 0;
+        const dataVenda = document.getElementById("dataVenda").value;
+
+        if (paymentType === "Dinheiro" && amountGiven < totalWithDiscount) {
+          alert("Valor recebido insuficiente.");
+          return;
+        }
+
+        if (!dataVenda) {
+          alert("Preencha a data e hora da venda.");
+          return;
+        }
+
+        const user = auth.currentUser;
+        if (user) {
+          const updates = {};
+          activeSaleItems.forEach(item => {
+            const productCode = item.codigo.startsWith('2') && item.codigo.length === 13 ? item.codigo.slice(1, 7) : item.codigo;
+            const currentStock = productsDatabase[productCode]?.estoque || 0;
+            updates[`produtos/${user.uid}/${productCode}/estoque`] = currentStock - item.quantidade;
+          });
+
+          const saleData = {
+            dataVenda,
+            valorTotal: totalWithDiscount,
+            valorOriginal: total,
+            desconto: appliedDiscount,
+            tipoPagamento: paymentType,
+            clienteId: selectedClient || null,
+            clienteNome: selectedClient ? clientsDatabase[selectedClient]?.nome || null : null,
+            items: activeSaleItems.map(item => ({
+              codigo: item.codigo,
+              nome: item.nome,
+              preco: item.preco,
+              quantidade: item.quantidade,
+              unidade: item.unidade,
+              categoria: item.categoria
+            })),
+            observacoes: "Venda PDV"
+          };
+
+          const newSaleRef = push(ref(db, `vendas/${user.uid}`));
+          Promise.all([set(newSaleRef, saleData), update(ref(db), updates)])
+            .then(() => {
+              alert("Venda registrada!");
+              printSaleReceipt(saleData, amountGiven);
+              cancelActiveSale();
+              document.getElementById("paymentModal").style.display = "none";
+              loadAllSalesAndFilter(user.uid);
+              loadProductsFromDatabase();
+            })
+            .catch(err => alert("Erro ao registrar venda: " + err.message));
+        }
+      };
+
+      document.getElementById("cancelSaleBtn").onclick = () => {
+        if (confirm("Cancelar venda atual?")) {
+          cancelActiveSale();
+          alert("Venda cancelada.");
+        }
+      };
+
+      function cancelActiveSale() {
+        activeSaleItems = [];
+        tempWeight = null;
+        appliedDiscount = 0;
+        selectedClient = "";
+        document.getElementById("selectClientSale").value = "";
+        updateActiveSaleDisplay();
+        updateProductSelection();
+        document.getElementById("barcodeInput").value = "";
+        document.getElementById("barcodeInput").placeholder = "Gramatura (150 *) ou Código (2#123456)";
+        document.getElementById("barcodeInput").focus();
+      }
+
+      function printSaleReceipt(sale, amountGiven) {
+        const {
+          jsPDF
+        } = window.jspdf;
+        const doc = new jsPDF();
+        let yPos = 10;
+        const margin = 10;
+
+        doc.setFontSize(14);
+        doc.text("Batavo", doc.internal.pageSize.getWidth() / 2, yPos, {
+          align: 'center'
+        });
+        yPos += 7;
+        doc.setFontSize(10);
+        doc.text(`Data: ${new Date(sale.dataVenda).toLocaleString('pt-BR')}`, margin, yPos);
+        if (sale.clienteNome) {
+          yPos += 7;
+          doc.text(`Cliente: ${sale.clienteNome}`, margin, yPos);
+        }
+        yPos += 7;
+        doc.text("-".repeat(40), margin, yPos);
+        yPos += 7;
+
+        sale.items.forEach(item => {
+          const quantidadeDisplay = item.unidade === 'kilo' ? `${(item.quantidade * 1000).toFixed(0)}g` : `${item.quantidade} un`;
+          doc.text(`${item.numero}. ${item.nome} (${quantidadeDisplay})`, margin, yPos);
+          doc.text(`R$ ${item.preco.toFixed(2).replace('.', ',')}`, doc.internal.pageSize.getWidth() - margin, yPos, {
+            align: 'right'
+          });
+          yPos += 7;
+        });
+
+        doc.text("-".repeat(40), margin, yPos);
+        yPos += 7;
+        if (sale.desconto > 0) {
+          doc.text(`Subtotal: R$ ${sale.valorOriginal.toFixed(2).replace('.', ',')}`, margin, yPos);
+          yPos += 7;
+          doc.text(`Desconto: R$ ${sale.desconto.toFixed(2).replace('.', ',')}`, margin, yPos);
+          yPos += 7;
+        }
+        doc.text(`TOTAL: R$ ${sale.valorTotal.toFixed(2).replace('.', ',')}`, margin, yPos);
+        doc.text(`Pagamento: ${sale.tipoPagamento}`, margin, yPos + 7);
+        yPos += 14;
+
+        if (sale.tipoPagamento === "Dinheiro") {
+          const change = amountGiven - sale.valorTotal;
+          doc.text(`Valor Recebido: R$ ${amountGiven.toFixed(2).replace('.', ',')}`, margin, yPos);
+          yPos += 7;
+          doc.text(`Troco: R$ ${change.toFixed(2).replace('.', ',')}`, margin, yPos);
+          yPos += 7;
+        }
+
+        doc.text("Obrigado!", doc.internal.pageSize.getWidth() / 2, yPos + 7, {
+          align: 'center'
+        });
+        doc.save(`venda_${new Date(sale.dataVenda).getTime()}.pdf`);
+      }
+
+      document.getElementById("submitSale").onclick = () => {
+        updateDataVenda();
+        const valorTotal = parseFloat(document.getElementById("valorTotal").value) || 0;
+        const tipoPagamento = document.getElementById("tipoPagamento").value;
+        const observacoes = document.getElementById("observacoes").value;
+        const dataVenda = document.getElementById("dataVenda").value;
+        const clientId = document.getElementById("selectClientManualSale").value;
+
+        if (valorTotal <= 0 || !dataVenda) {
+          alert("Preencha valor total e data da venda.");
+          return;
+        }
+
+        const user = auth.currentUser;
+        if (user) {
+          const saleData = {
+            dataVenda,
+            valorTotal,
+            tipoPagamento,
+            observacoes,
+            clienteId: clientId || null,
+            clienteNome: clientId ? clientsDatabase[clientId]?.nome || null : null,
+            items: []
+          };
+          const baseRef = ref(db, `vendas/${user.uid}`);
+          const refToUse = editId ? ref(db, `vendas/${user.uid}/${editId}`) : push(baseRef);
+          (editId ? update : set)(refToUse, saleData)
+          .then(() => {
+              alert(editId ? "Venda atualizada!" : "Venda registrada!");
+              editId = null;
+              limparFormulario();
+              loadAllSalesAndFilter(user.uid);
+            })
+            .catch(err => alert("Erro ao registrar venda: " + err.message));
+        }
+      };
+
+      function loadAllSalesAndFilter(uid) {
+        const vendasRef = ref(db, `vendas/${uid}`);
+        onValue(vendasRef, snapshot => {
+          allSalesData = snapshot.exists() ?
+            Object.entries(snapshot.val()).map(([key, item]) => ({
+              id: key,
+              ...item
+            })) : [];
+          applyFiltersAndDisplaySales();
+          updateRankingDisplay();
+          displayClients();
+        });
+      }
+
+      function applyFiltersAndDisplaySales() {
+        const container = document.getElementById("saleList");
+        let currentTotalSales = 0;
+        const filterDateStart = document.getElementById("filterDateStart").value ? new Date(document.getElementById("filterDateStart").value + 'T00:00:00') : null;
+        const filterDateEnd = document.getElementById("filterDateEnd").value ? new Date(document.getElementById("filterDateEnd").value + 'T23:59:59') : null;
+        const filterPaymentType = document.getElementById("filterPaymentType").value;
+        const filterClient = document.getElementById("filterClient").value;
+
+        filteredSalesData = allSalesData.filter(sale => {
+          const saleDate = new Date(sale.dataVenda);
+          return (
+            (!filterDateStart || saleDate >= filterDateStart) &&
+            (!filterDateEnd || saleDate <= filterDateEnd) &&
+            (filterPaymentType === "Todos" || sale.tipoPagamento === filterPaymentType) &&
+            (filterClient === "Todos" || sale.clienteId === filterClient)
+          );
+        });
+
+        container.innerHTML = filteredSalesData.length === 0 ?
+          "Nenhuma venda encontrada." :
+          filteredSalesData.map(item => {
+            currentTotalSales += item.valorTotal;
+            const itemsList = item.items?.length > 0 ?
+              `<ul>${item.items.map(i => `<li>${i.nome} (${i.unidade === 'kilo' ? (i.quantidade * 1000).toFixed(0) + 'g' : i.quantidade + ' un'}, R$ ${i.preco.toFixed(2).replace('.', ',')})</li>`).join('')}</ul>` :
+              '';
+            return `
+            <div style="border: 1px solid #eee; padding: 10px; margin: 10px 0;">
+              <strong>Data:</strong> ${new Date(item.dataVenda).toLocaleString('pt-BR')}<br>
+              <strong>Cliente:</strong> ${item.clienteNome || 'Sem Cliente'}<br>
+              <strong>Valor:</strong> R$ ${item.valorTotal.toFixed(2).replace('.', ',')}<br>
+              ${item.desconto > 0 ? `<strong>Desconto:</strong> R$ ${item.desconto.toFixed(2).replace('.', ',')}<br>` : ''}
+              <strong>Pagamento:</strong> ${item.tipoPagamento}<br>
+              <strong>Obs.:</strong> ${item.observacoes || 'N/A'}<br>
+              ${itemsList ? `<strong>Itens:</strong>${itemsList}` : ''}
+              <button onclick="editarVenda('${item.id}')">Editar</button>
+              <button onclick="excluirVenda('${item.id}')">Excluir</button>
+            </div>
+          `;
+          }).join('');
+
+        document.getElementById("totalSalesValue").textContent = `R$ ${currentTotalSales.toFixed(2).replace('.', ',')}`;
+      }
+
+      document.getElementById("applyFiltersBtn").onclick = applyFiltersAndDisplaySales;
+
+      function updateRankingDisplay() {
+        const rankingListDiv = document.getElementById("rankingList");
+        const productSales = {};
+        filteredSalesData.forEach(sale => {
+          if (sale.items?.length > 0) {
+            sale.items.forEach(item => {
+              const productCode = item.codigo.startsWith('2') && item.codigo.length === 13 ? item.codigo.slice(1, 7) : item.codigo;
+              if (!productSales[productCode]) {
+                productSales[productCode] = {
+                  nome: item.nome,
+                  unidade: item.unidade,
+                  quantidade: 0,
+                  valorTotal: 0
+                };
+              }
+              productSales[productCode].quantidade += item.quantidade;
+              productSales[productCode].valorTotal += item.preco;
+            });
+          }
+        });
+
+        const ranking = Object.entries(productSales)
+          .map(([code, data]) => ({
+            code,
+            ...data
+          }))
+          .sort((a, b) => b.quantidade - a.quantidade);
+
+        rankingListDiv.innerHTML = ranking.length === 0 ?
+          "<p>Nenhum dado de vendas.</p>" :
+          `<table>
+           <thead>
+             <tr>
+               <th>Pos</th>
+               <th>Código</th>
+               <th>Nome</th>
+               <th>Un</th>
+               <th>Qtde</th>
+               <th>Valor</th>
+             </tr>
+           </thead>
+           <tbody>
+             ${ranking.map((product, index) => `
+               <tr>
+                 <td>${index + 1}</td>
+                 <td>${product.code}</td>
+                 <td>${product.nome}</td>
+                 <td>${product.unidade === 'kilo' ? 'Kilo' : 'Un'}</td>
+                 <td>${product.unidade === 'kilo' ? (product.quantidade * 1000).toFixed(0) + 'g' : product.quantidade + ' un'}</td>
+                 <td>R$ ${product.valorTotal.toFixed(2).replace('.', ',')}</td>
+               </tr>
+             `).join('')}
+           </tbody>
+         </table>`;
+      }
+
+      document.getElementById("exportRankingPdfBtn").onclick = () => {
+        const productSales = {};
+        filteredSalesData.forEach(sale => {
+          if (sale.items?.length > 0) {
+            sale.items.forEach(item => {
+              const productCode = item.codigo.startsWith('2') && item.codigo.length === 13 ? item.codigo.slice(1, 7) : item.codigo;
+              if (!productSales[productCode]) {
+                productSales[productCode] = {
+                  nome: item.nome,
+                  unidade: item.unidade,
+                  quantidade: 0,
+                  valorTotal: 0
+                };
+              }
+              productSales[productCode].quantidade += item.quantidade;
+              productSales[productCode].valorTotal += item.preco;
+            });
+          }
+        });
+
+        const ranking = Object.entries(productSales)
+          .map(([code, data]) => ({
+            code,
+            ...data
+          }))
+          .sort((a, b) => b.quantidade - a.quantidade);
+
+        if (ranking.length === 0) {
+          alert("Não há dados para exportar.");
+          return;
+        }
+
+        const {
+          jsPDF
+        } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text("Ranking de Produtos", 10, 10);
+        doc.setFontSize(10);
+        doc.text(`Período: ${document.getElementById("filterDateStart").value || 'Início'} até ${document.getElementById("filterDateEnd").value || 'Hoje'}`, 10, 20);
+
+        const tableColumn = ["Pos", "Código", "Nome", "Unidade", "Qtde Vendida", "Valor (R$)"];
+        const tableRows = ranking.map((product, index) => [
+          index + 1,
+          product.code,
+          product.nome,
+          product.unidade === 'kilo' ? 'Kilo' : 'Unidade',
+          product.unidade === 'kilo' ? `${(product.quantidade * 1000).toFixed(0)}g` : `${product.quantidade} un`,
+          `R$ ${product.valorTotal.toFixed(2).replace('.', ',')}`
+        ]);
+
+        doc.autoTable({
+          head: [tableColumn],
+          body: tableRows,
+          startY: 30,
+          styles: {
+            fontSize: 8,
+            cellPadding: 2
+          },
+          headStyles: {
+            fillColor: [41, 128, 185],
+            textColor: [255, 255, 255]
+          },
+          alternateRowStyles: {
+            fillColor: [240, 240, 240]
+          }
+        });
+
+        doc.save("ranking_produtos.pdf");
+      };
+
+      document.getElementById("exportStockPdfBtn").onclick = () => {
+        if (Object.keys(productsDatabase).length === 0) {
+          alert("Nenhum produto cadastrado.");
+          return;
+        }
+
+        const {
+          jsPDF
+        } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text("Relatório de Estoque", 10, 10);
+        doc.setFontSize(10);
+        doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 10, 20);
+
+        const tableColumn = ["Código", "Nome", "Preço (R$)", "Unidade", "Categoria", "Estoque"];
+        const tableRows = Object.entries(productsDatabase).map(([barcode, product]) => [
+          barcode,
+          product.nome,
+          `R$ ${product.preco.toFixed(2).replace('.', ',')}`,
+          product.unidade === 'kilo' ? 'Kilo' : 'Unidade',
+          categoriesDatabase[product.categoria]?.nome || 'Sem categoria',
+          `${(product.estoque || 0).toFixed(3).replace('.', ',')} ${product.unidade === 'kilo' ? 'kg' : 'un'}`
+        ]);
+
+        doc.autoTable({
+          head: [tableColumn],
+          body: tableRows,
+          startY: 30,
+          styles: {
+            fontSize: 8,
+            cellPadding: 2
+          },
+          headStyles: {
+            fillColor: [41, 128, 185],
+            textColor: [255, 255, 255]
+          },
+          alternateRowStyles: {
+            fillColor: [240, 240, 240]
+          }
+        });
+
+        doc.save("estoque_atual.pdf");
+      };
+
+      document.getElementById("exportPdfBtn").onclick = () => {
+        if (filteredSalesData.length === 0) {
+          alert("Nenhuma venda para exportar.");
+          return;
+        }
+
+        const {
+          jsPDF
+        } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text("Relatório de Vendas", 10, 10);
+
+        const tableColumn = ["Data", "Cliente", "Valor", "Desconto", "Pagamento", "Obs", "Itens"];
+        const tableRows = filteredSalesData.map(sale => [
+          new Date(sale.dataVenda).toLocaleString('pt-BR'),
+          sale.clienteNome || 'Sem Cliente',
+          `R$ ${sale.valorTotal.toFixed(2).replace('.', ',')}`,
+          sale.desconto > 0 ? `R$ ${sale.desconto.toFixed(2).replace('.', ',')}` : 'N/A',
+          sale.tipoPagamento,
+          sale.observacoes || 'N/A',
+          sale.items?.length > 0 ?
+          sale.items.map(i => `${i.nome} (${i.unidade === 'kilo' ? (i.quantidade * 1000).toFixed(0) + 'g' : i.quantidade + ' un'}, R$ ${i.preco.toFixed(2).replace('.', ',')})`).join('\n') :
+          'N/A'
+        ]);
+
+        doc.autoTable({
+          head: [tableColumn],
+          body: tableRows,
+          startY: 20,
+          styles: {
+            fontSize: 8,
+            cellPadding: 2
+          },
+          headStyles: {
+            fillColor: [41, 128, 185],
+            textColor: [255, 255, 255]
+          },
+          alternateRowStyles: {
+            fillColor: [240, 240, 240]
+          }
+        });
+
+        doc.save("vendas_filtradas.pdf");
+      };
+
+      document.getElementById("exportExcelBtn").onclick = () => {
+        if (filteredSalesData.length === 0) {
+          alert("Nenhuma venda para exportar.");
+          return;
+        }
+
+        const dataToExport = filteredSalesData.map(sale => ({
+          "Data/Hora": new Date(sale.dataVenda).toLocaleString('pt-BR'),
+          "Cliente": sale.clienteNome || 'Sem Cliente',
+          "Valor Total": sale.valorTotal,
+          "Desconto": sale.desconto > 0 ? sale.desconto : 'N/A',
+          "Tipo de Pagamento": sale.tipoPagamento,
+          "Observações": sale.observacoes || 'N/A',
+          "Itens": sale.items?.length > 0 ?
+            sale.items.map(i => `${i.nome} (${i.unidade === 'kilo' ? (i.quantidade * 1000).toFixed(0) + 'g' : i.quantidade + ' un'}, R$ ${i.preco.toFixed(2).replace('.', ',')})`).join('; ') : ''
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Vendas");
+        XLSX.writeFile(workbook, "vendas.xlsx");
+      };
+
+      document.getElementById("sendReportBtn").onclick = () => {
+        const phoneNumber = document.getElementById("phoneNumber").value.trim();
+        if (!phoneNumber || filteredSalesData.length === 0) {
+          alert("Insira um número ou verifique se há vendas para enviar.");
+          return;
+        }
+
+        let reportMessage = "Relatório de Vendas:\n\n";
+        filteredSalesData.forEach(sale => {
+          reportMessage += `Data: ${new Date(sale.dataVenda).toLocaleString('pt-BR')}\n`;
+          reportMessage += `Cliente: ${sale.clienteNome || 'Sem Cliente'}\n`;
+          reportMessage += `Valor: R$ ${sale.valorTotal.toFixed(2).replace('.', ',')}\n`;
+          if (sale.desconto > 0) reportMessage += `Desconto: R$ ${sale.desconto.toFixed(2).replace('.', ',')}\n`;
+          reportMessage += `Pagamento: ${sale.tipoPagamento}\n`;
+          reportMessage += `Obs.: ${sale.observacoes || 'N/A'}\n`;
+          if (sale.items?.length > 0) {
+            reportMessage += "Itens:\n" + sale.items.map(i => `  - ${i.nome} (${i.unidade === 'kilo' ? (i.quantidade * 1000).toFixed(0) + 'g' : i.quantidade + ' un'}, R$ ${i.preco.toFixed(2).replace('.', ',')})`).join('\n') + "\n";
+          }
+          reportMessage += "----\n";
+        });
+        reportMessage += `Total: R$ ${filteredSalesData.reduce((acc, sale) => acc + sale.valorTotal, 0).toFixed(2).replace('.', ',')}`;
+
+        if (confirm("Abrir WhatsApp com o relatório?")) {
+          window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(reportMessage)}`, '_blank');
+        }
+      };
+
+      window.editarVenda = id => {
+        const user = auth.currentUser;
+        if (user) {
+          onValue(ref(db, `vendas/${user.uid}/${id}`), snapshot => {
+            if (snapshot.exists()) {
+              const item = snapshot.val();
+              document.getElementById("dataVenda").value = item.dataVenda;
+              document.getElementById("valorTotal").value = item.valorTotal;
+              document.getElementById("tipoPagamento").value = item.tipoPagamento;
+              document.getElementById("observacoes").value = item.observacoes;
+              document.getElementById("selectClientManualSale").value = item.clienteId || "";
+              editId = id;
+            }
+          }, {
+            onlyOnce: true
+          });
+        }
+      };
+
+      window.excluirVenda = id => {
+        if (confirm("Excluir esta venda?")) {
+          const user = auth.currentUser;
+          if (user) {
+            remove(ref(db, `vendas/${user.uid}/${id}`))
+              .then(() => {
+                alert("Venda excluída!");
+                loadAllSalesAndFilter(user.uid);
+              })
+              .catch(err => alert("Erro ao excluir: " + err.message));
+          }
+        }
+      };
+
+      function limparFormulario() {
+        document.getElementById("valorTotal").value = "";
+        document.getElementById("tipoPagamento").value = "Pix";
+        document.getElementById("observacoes").value = "";
+        document.getElementById("selectClientManualSale").value = "";
+        updateDataVenda();
+      }
+    </script>
+
+  </body>
+
+</html>
