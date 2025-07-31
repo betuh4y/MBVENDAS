@@ -177,6 +177,10 @@
       background-color: #ffe6e6;
     }
 
+    .hidden-section {
+      display: none !important;
+    }
+
     @media (max-width: 600px) {
       body {
         padding: 5px;
@@ -237,6 +241,7 @@
 
   <div id="saleSection" style="display:none;">
     <button id="logoutBtn">Sair</button>
+    <button id="toggleSectionsBtn">Modo Simplificado</button>
     <hr>
     <h3>Nova Venda</h3>
     <div class="filters">
@@ -287,16 +292,16 @@
       </div>
     </div>
 
-    <hr>
-    <h3>Gerenciar Categorias</h3>
+    <hr class="section-divider">
+    <h3 class="section-title">Gerenciar Categorias</h3>
     <input type="text" id="newCategoryName" placeholder="Nome da Categoria">
     <button id="addCategoryBtn">Salvar Categoria</button>
     <div id="categoryList">
       <p>Nenhuma categoria cadastrada.</p>
     </div>
 
-    <hr>
-    <h3>Gerenciar Clientes</h3>
+    <hr class="section-divider">
+    <h3 class="section-title">Gerenciar Clientes</h3>
     <input type="text" id="newClientName" placeholder="Nome do Cliente">
     <input type="text" id="newClientCpfCnpj" placeholder="CPF ou CNPJ">
     <input type="text" id="newClientPhone" placeholder="Telefone (ex.: 5519987654321)">
@@ -306,8 +311,8 @@
       <p>Nenhum cliente cadastrado.</p>
     </div>
 
-    <hr>
-    <h3>Cadastrar Produto</h3>
+    <hr class="section-divider">
+    <h3 class="section-title">Cadastrar Produto</h3>
     <input type="text" id="newProductBarcode" placeholder="Código de Barras">
     <input type="text" id="newProductName" placeholder="Nome do Produto">
     <input type="number" id="newProductPrice" placeholder="Preço (R$)" step="0.01">
@@ -321,15 +326,15 @@
     <input type="number" id="newProductStock" placeholder="Estoque (un/kg)" step="0.001">
     <button id="addProductBtn">Salvar Produto</button>
 
-    <hr>
+    <hr class="section-divider">
     <h3>Produtos</h3>
     <button id="toggleProductListBtn">Mostrar Produtos</button>
     <div id="productList" style="display:none;">
       <p>Nenhum produto cadastrado.</p>
     </div>
 
-    <hr>
-    <h3>Venda Manual</h3>
+    <hr class="section-divider">
+    <h3 class="section-title">Venda Manual</h3>
     <input type="datetime-local" id="dataVenda" required>
     <select id="selectClientManualSale">
       <option value="">Sem Cliente</option>
@@ -345,8 +350,8 @@
     <textarea id="observacoes" placeholder="Observações"></textarea>
     <button id="submitSale">Salvar Venda</button>
 
-    <hr>
-    <h3>Filtrar Vendas</h3>
+    <hr class="section-divider">
+    <h3 class="section-title">Filtrar Vendas</h3>
     <div class="filters">
       <input type="date" id="filterDateStart">
       <input type="date" id="filterDateEnd">
@@ -364,32 +369,32 @@
       <button id="applyFiltersBtn">Filtrar</button>
     </div>
 
-    <hr>
-    <h3>Lista de Clientes</h3>
+    <hr class="section-divider">
+    <h3 class="section-title">Lista de Clientes</h3>
     <div id="clientSalesList">
       <p>Nenhum cliente cadastrado.</p>
     </div>
 
-    <hr>
-    <h3>Ranking de Produtos</h3>
+    <hr class="section-divider">
+    <h3 class="section-title">Ranking de Produtos</h3>
     <div id="rankingList">
       <p>Nenhum dado de vendas.</p>
     </div>
     <button id="exportRankingPdfBtn">Baixar Ranking (PDF)</button>
 
-    <hr>
-    <h3>Exportar Relatórios</h3>
+    <hr class="section-divider">
+    <h3 class="section-title">Exportar Relatórios</h3>
     <button id="exportPdfBtn">Vendas (PDF)</button>
     <button id="exportExcelBtn">Vendas (Excel)</button>
     <button id="exportStockPdfBtn">Estoque (PDF)</button>
 
-    <hr>
-    <h3>Enviar Relatório</h3>
+    <hr class="section-divider">
+    <h3 class="section-title">Enviar Relatório</h3>
     <input type="text" id="phoneNumber" placeholder="Número (Ex: 5511987654321)">
     <button id="sendReportBtn">Enviar Relatório</button>
 
-    <hr>
-    <h3>Suas Vendas</h3>
+    <hr class="section-divider">
+    <h3 class="section-title">Suas Vendas</h3>
     <div class="total-sales">Total: <span id="totalSalesValue">R$ 0,00</span></div>
     <div id="saleList"></div>
   </div>
@@ -443,6 +448,34 @@
     let selectedClient = "";
 
     document.getElementById("barcodeInput").focus();
+
+    // Função para alternar visibilidade das seções
+    document.getElementById("toggleSectionsBtn").onclick = () => {
+      const toggleBtn = document.getElementById("toggleSectionsBtn");
+      const isSimplified = toggleBtn.textContent === "Modo Simplificado";
+
+      // Seções a serem ocultadas no modo simplificado
+      const sections = document.querySelectorAll(".section-title, .section-divider");
+      sections.forEach(section => {
+        let nextElement = section.nextElementSibling;
+        if (section.textContent === "Nova Venda" || section.textContent === "Produtos") {
+          section.classList.remove("hidden-section");
+          while (nextElement && nextElement.tagName !== "HR") {
+            nextElement.classList.remove("hidden-section");
+            nextElement = nextElement.nextElementSibling;
+          }
+        } else {
+          section.classList.toggle("hidden-section", isSimplified);
+          while (nextElement && nextElement.tagName !== "HR") {
+            nextElement.classList.toggle("hidden-section", isSimplified);
+            nextElement = nextElement.nextElementSibling;
+          }
+        }
+      });
+
+      // Atualizar texto do botão
+      toggleBtn.textContent = isSimplified ? "Modo Completo" : "Modo Simplificado";
+    };
 
     function updateDataVenda() {
       const now = new Date();
@@ -859,30 +892,29 @@
     };
 
     function updateProductSelection() {
-  const productSelectionDiv = document.getElementById("productSelection");
-  const filteredProducts = selectedCategory === "Todas" ?
-    Object.entries(productsDatabase) :
-    Object.entries(productsDatabase).filter(([_, product]) => product.categoria === selectedCategory);
+      const productSelectionDiv = document.getElementById("productSelection");
+      const filteredProducts = selectedCategory === "Todas" ?
+        Object.entries(productsDatabase) :
+        Object.entries(productsDatabase).filter(([_, product]) => product.categoria === selectedCategory);
 
-  // Ordenar produtos por nome em ordem alfabética
-  filteredProducts.sort((a, b) => a[1].nome.localeCompare(b[1].nome, 'pt-BR'));
+      // Ordenar produtos por nome em ordem alfabética
+      filteredProducts.sort((a, b) => a[1].nome.localeCompare(b[1].nome, 'pt-BR'));
 
-  productSelectionDiv.innerHTML = filteredProducts.length === 0 ?
-    "<p>Nenhum produto encontrado para esta categoria.</p>" :
-    filteredProducts.map(([barcode, product]) => `
-      <div class="product-card">
-        <h4>${product.nome}</h4>
-        <p>R$ ${product.preco.toFixed(2).replace('.', ',')} / ${product.unidade === 'kilo' ? 'kg' : 'un'}</p>
-        <p>Estoque: ${(product.estoque || 0).toFixed(3).replace('.', ',')} ${product.unidade === 'kilo' ? 'kg' : 'un'}</p>
-        <div class="quantity-controls">
-          <button onclick="adjustQuantity('${barcode}', -1)">−</button>
-          <input type="number" id="qty-${barcode}" value="0" min="0" step="${product.unidade === 'kilo' ? '0.001' : '1'}">
-          <button onclick="adjustQuantity('${barcode}', 1)">+</button>
-        </div>
-      </div>
-    `).join('');
-}
-    
+      productSelectionDiv.innerHTML = filteredProducts.length === 0 ?
+        "<p>Nenhum produto encontrado para esta categoria.</p>" :
+        filteredProducts.map(([barcode, product]) => `
+          <div class="product-card">
+            <h4>${product.nome}</h4>
+            <p>R$ ${product.preco.toFixed(2).replace('.', ',')} / ${product.unidade === 'kilo' ? 'kg' : 'un'}</p>
+            <p>Estoque: ${(product.estoque || 0).toFixed(3).replace('.', ',')} ${product.unidade === 'kilo' ? 'kg' : 'un'}</p>
+            <div class="quantity-controls">
+              <button onclick="adjustQuantity('${barcode}', -1)">−</button>
+              <input type="number" id="qty-${barcode}" value="0" min="0" step="${product.unidade === 'kilo' ? '0.001' : '1'}">
+              <button onclick="adjustQuantity('${barcode}', 1)">+</button>
+            </div>
+          </div>
+        `).join('');
+    }
 
     window.adjustQuantity = (barcode, delta) => {
       const input = document.getElementById(`qty-${barcode}`);
@@ -917,7 +949,6 @@
       }
 
       updateActiveSaleDisplay();
-      // Removido o foco automático para evitar scroll
     }
 
     document.getElementById("barcodeInput").addEventListener("keypress", function(event) {
@@ -959,7 +990,6 @@
             this.value = "";
             this.placeholder = "Gramatura (150 *) ou Código (2#123456)";
           }
-          // Removido o foco automático para evitar scroll
         }
       }
     });
@@ -1014,7 +1044,6 @@
       updateActiveSaleDisplay();
       updateProductSelection();
       document.getElementById(`qty-${barcode}`).value = quantidade.toFixed(product.unidade === 'kilo' ? 3 : 0);
-      // Removido o foco automático para evitar scroll
     }
 
     window.removeItemFromActiveSale = itemNumber => {
@@ -1027,7 +1056,6 @@
         numero: index + 1
       }));
       updateActiveSaleDisplay();
-      // Removido o foco automático para evitar scroll
     };
 
     function updateActiveSaleDisplay() {
@@ -1077,7 +1105,6 @@
       tempWeight = null;
       appliedDiscount = 0;
       document.getElementById("barcodeInput").placeholder = "Gramatura (150 *) ou Código (2#123456)";
-      // Removido o foco automático para evitar scroll
     };
 
     document.getElementById("modalPaymentType").onchange = function() {
@@ -1215,7 +1242,6 @@
       updateProductSelection();
       document.getElementById("barcodeInput").value = "";
       document.getElementById("barcodeInput").placeholder = "Gramatura (150 *) ou Código (2#123456)";
-      // Removido o foco automático para evitar scroll
     }
 
     function printSaleReceipt(sale, amountGiven) {
