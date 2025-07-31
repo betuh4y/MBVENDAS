@@ -288,6 +288,8 @@
           <input type="number" id="amountGiven" placeholder="Valor pago" step="0.01">
           <p>Troco: <span id="changeDue">R$ 0,00</span></p>
         </div>
+        <label>Observações:</label>
+        <textarea id="modalObservations" placeholder="Observações (opcional)"></textarea>
         <button id="confirmPaymentBtn">Confirmar Pagamento</button>
       </div>
     </div>
@@ -1111,8 +1113,10 @@
       document.getElementById("modalTotalWithDiscount").textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
       document.getElementById("modalClientName").textContent = selectedClient ? clientsDatabase[selectedClient]?.nome || "Sem Cliente" : "Sem Cliente";
       document.getElementById("discountInput").value = "";
+      document.getElementById("modalObservations").value = "";
       if (isEditingSale) {
         document.getElementById("modalPaymentType").value = editingSaleData.tipoPagamento;
+        document.getElementById("modalObservations").value = editingSaleData.observacoes || "";
       } else {
         document.getElementById("modalPaymentType").value = "Pix";
       }
@@ -1195,6 +1199,7 @@
       const paymentType = document.getElementById("modalPaymentType").value;
       const amountGiven = parseFloat(document.getElementById("amountGiven").value) || 0;
       const dataVenda = document.getElementById("dataVenda").value;
+      const observacoes = document.getElementById("modalObservations").value.trim() || "Venda PDV";
 
       if (paymentType === "Dinheiro" && amountGiven < totalWithDiscount) {
         alert("Valor recebido insuficiente.");
@@ -1224,7 +1229,7 @@
             unidade: item.unidade,
             categoria: item.categoria
           })),
-          observacoes: isEditingSale ? editingSaleData.observacoes : "Venda PDV"
+          observacoes
         };
 
         const updates = {};
@@ -1346,6 +1351,11 @@
         doc.text(`Valor Recebido: R$ ${amountGiven.toFixed(2).replace('.', ',')}`, margin, yPos);
         yPos += 7;
         doc.text(`Troco: R$ ${change.toFixed(2).replace('.', ',')}`, margin, yPos);
+        yPos += 7;
+      }
+
+      if (sale.observacoes && sale.observacoes !== "Venda PDV") {
+        doc.text(`Obs.: ${sale.observacoes}`, margin, yPos);
         yPos += 7;
       }
 
