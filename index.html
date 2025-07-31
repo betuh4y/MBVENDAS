@@ -446,6 +446,10 @@
     let appliedDiscount = 0;
     let selectedCategory = "Todas";
     let selectedClient = "";
+    let isEditingSale = false;
+    let originalItems = [];
+    let editingSaleData = null;
+    let adjustedStock = {};
 
     document.getElementById("barcodeInput").focus();
 
@@ -485,6 +489,10 @@
       const hours = String(now.getHours()).padStart(2, '0');
       const minutes = String(now.getMinutes()).padStart(2, '0');
       document.getElementById("dataVenda").value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
+    function getProductCode(barcode) {
+      return barcode.startsWith('2') && barcode.length === 13 ? barcode.slice(1, 7) : barcode;
     }
 
     // Autenticação
@@ -919,10 +927,12 @@
     window.adjustQuantity = (barcode, delta) => {
       const input = document.getElementById(`qty-${barcode}`);
       const product = productsDatabase[barcode];
+      const productCode = getProductCode(barcode);
+      const effectiveStock = isEditingSale ? (adjustedStock[productCode] || product.estoque) : product.estoque;
       let newQty = parseFloat(input.value) + delta * (product.unidade === 'kilo' ? 0.001 : 1);
       if (newQty < 0) newQty = 0;
-      if (newQty > product.estoque) {
-        alert("Quantidade excede o estoque disponível.");
+      if (newQty > effectiveStock) {
+        alert("Quantidade excede o estoque disponível (ajustado).");
         return;
       }
       input.value = newQty.toFixed(product.unidade === 'kilo' ? 3 : 0);
@@ -997,6 +1007,8 @@
     function addItemToActiveSale(barcode, quantidade = 1) {
       let product = productsDatabase[barcode];
       let preco;
+      const productCode = getProductCode(barcode);
+      const effectiveStock = isEditingSale ? (adjustedStock[productCode] || (productsDatabase[productCode] ? productsDatabase[productCode].estoque : 0)) : (productsDatabase[productCode] ? productsDatabase[productCode].estoque : 0);
 
       if (tempWeight) {
         if (!product || product.unidade !== 'kilo') {
@@ -1009,10 +1021,10 @@
         preco = product.preco * quantidade;
         tempWeight = null;
       } else if (barcode.startsWith('2') && barcode.length === 13) {
-        const productCode = barcode.slice(1, 7);
-        product = productsDatabase[productCode];
+        const productCodeTemp = barcode.slice(1, 7);
+        product = productsDatabase[productCodeTemp];
         if (!product || product.unidade !== 'kilo') {
-          alert(`Produto ${productCode} não encontrado ou não é por peso.`);
+          alert(`Produto ${productCodeTemp} não encontrado ou não é por peso.`);
           return;
         }
         const priceCents = parseInt(barcode.slice(7, 12));
@@ -1026,8 +1038,8 @@
         preco = product.preco * quantidade;
       }
 
-      if (quantidade > product.estoque) {
-        alert("Quantidade excede o estoque disponível.");
+      if (quantidade > effectiveStock) {
+        alert("Quantidade excede o estoque disponível (ajustado).");
         return;
       }
 
@@ -1095,9 +1107,13 @@
       document.getElementById("modalTotalWithDiscount").textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
       document.getElementById("modalClientName").textContent = selectedClient ? clientsDatabase[selectedClient]?.nome || "Sem Cliente" : "Sem Cliente";
       document.getElementById("discountInput").value = "";
+      if (isEditingSale) {
+        document.getElementById("modalPaymentType").value = editingSaleData.tipoPagamento;
+      } else {
+        document.getElementById("modalPaymentType").value = "Pix";
+      }
       document.getElementById("paymentModal").style.display = "block";
       document.getElementById("amountGivenContainer").style.display = "none";
-      document.getElementById("modalPaymentType").value = "Pix";
     };
 
     document.querySelector(".close-button").onclick = () => {
@@ -1105,6 +1121,9 @@
       tempWeight = null;
       appliedDiscount = 0;
       document.getElementById("barcodeInput").placeholder = "Gramatura (150 *) ou Código (2#123456)";
+      if (isEditingSale) {
+        cancelActiveSale();
+      }
     };
 
     document.getElementById("modalPaymentType").onchange = function() {
@@ -1185,13 +1204,6 @@
 
       const user = auth.currentUser;
       if (user) {
-        const updates = {};
-        activeSaleItems.forEach(item => {
-          const productCode = item.codigo.startsWith('2') && item.codigo.length === 13 ? item.codigo.slice(1, 7) : item.codigo;
-          const currentStock = productsDatabase[productCode]?.estoque || 0;
-          updates[`produtos/${user.uid}/${productCode}/estoque`] = currentStock - item.quantidade;
-        });
-
         const saleData = {
           dataVenda,
           valorTotal: totalWithDiscount,
@@ -1208,18 +1220,54 @@
             unidade: item.unidade,
             categoria: item.categoria
           })),
-          observacoes: "Venda PDV"
+          observacoes: isEditingSale ? editingSaleData.observacoes : "Venda PDV"
         };
 
-        const newSaleRef = push(ref(db, `vendas/${user.uid}`));
-        Promise.all([set(newSaleRef, saleData), update(ref(db), updates)])
+        const updates = {};
+
+        const oldQuantities = {};
+        originalItems.forEach(item => {
+          const code = getProductCode(item.codigo);
+          oldQuantities[code] = (oldQuantities[code] || 0) + item.quantidade;
+        });
+
+        const newQuantities = {};
+        activeSaleItems.forEach(item => {
+          const code = getProductCode(item.codigo);
+          newQuantities[code] = (newQuantities[code] || 0) + item.quantidade;
+        });
+
+        const allCodes = new Set([...Object.keys(oldQuantities), ...Object.keys(newQuantities)]);
+        allCodes.forEach(code => {
+          const delta = (newQuantities[code] || 0) - (oldQuantities[code] || 0);
+          if (delta !== 0) {
+            const currentStock = productsDatabase[code]?.estoque || 0;
+            updates[`produtos/${user.uid}/${code}/estoque`] = currentStock - delta;
+          }
+        });
+
+        let refToUse;
+        if (isEditingSale) {
+          refToUse = ref(db, `vendas/${user.uid}/${editId}`);
+        } else {
+          refToUse = push(ref(db, `vendas/${user.uid}`));
+        }
+
+        Promise.all([set(refToUse, saleData), update(ref(db), updates)])
           .then(() => {
-            alert("Venda registrada!");
+            alert(isEditingSale ? "Venda atualizada!" : "Venda registrada!");
             printSaleReceipt(saleData, amountGiven);
             cancelActiveSale();
             document.getElementById("paymentModal").style.display = "none";
             loadAllSalesAndFilter(user.uid);
             loadProductsFromDatabase();
+            if (isEditingSale) {
+              isEditingSale = false;
+              editingSaleData = null;
+              originalItems = [];
+              editId = null;
+              adjustedStock = {};
+            }
           })
           .catch(err => alert("Erro ao registrar venda: " + err.message));
       }
@@ -1242,6 +1290,13 @@
       updateProductSelection();
       document.getElementById("barcodeInput").value = "";
       document.getElementById("barcodeInput").placeholder = "Gramatura (150 *) ou Código (2#123456)";
+      if (isEditingSale) {
+        isEditingSale = false;
+        editingSaleData = null;
+        originalItems = [];
+        editId = null;
+        adjustedStock = {};
+      }
     }
 
     function printSaleReceipt(sale, amountGiven) {
@@ -1396,7 +1451,7 @@
       filteredSalesData.forEach(sale => {
         if (sale.items?.length > 0) {
           sale.items.forEach(item => {
-            const productCode = item.codigo.startsWith('2') && item.codigo.length === 13 ? item.codigo.slice(1, 7) : item.codigo;
+            const productCode = getProductCode(item.codigo);
             if (!productSales[productCode]) {
               productSales[productCode] = {
                 nome: item.nome,
@@ -1451,7 +1506,7 @@
       filteredSalesData.forEach(sale => {
         if (sale.items?.length > 0) {
           sale.items.forEach(item => {
-            const productCode = item.codigo.startsWith('2') && item.codigo.length === 13 ? item.codigo.slice(1, 7) : item.codigo;
+            const productCode = getProductCode(item.codigo);
             if (!productSales[productCode]) {
               productSales[productCode] = {
                 nome: item.nome,
@@ -1634,27 +1689,76 @@
         onValue(ref(db, `vendas/${user.uid}/${id}`), snapshot => {
           if (snapshot.exists()) {
             const item = snapshot.val();
-            document.getElementById("dataVenda").value = item.dataVenda;
-            document.getElementById("valorTotal").value = item.valorTotal;
-            document.getElementById("tipoPagamento").value = item.tipoPagamento;
-            document.getElementById("observacoes").value = item.observacoes;
-            document.getElementById("selectClientManualSale").value = item.clienteId || "";
-            editId = id;
+            document.getElementById("dataVenda").value = item.dataVenda.slice(0, 16);
+            if (item.items && item.items.length > 0) {
+              isEditingSale = true;
+              editId = id;
+              editingSaleData = {...item};
+              activeSaleItems = item.items.map((i, idx) => ({
+                numero: idx + 1,
+                codigo: i.codigo,
+                nome: i.nome,
+                preco: i.preco,
+                quantidade: i.quantidade,
+                unidade: i.unidade,
+                categoria: i.categoria
+              }));
+              originalItems = [...item.items];
+              const oldQuantities = {};
+              originalItems.forEach(originalItem => {
+                const code = getProductCode(originalItem.codigo);
+                oldQuantities[code] = (oldQuantities[code] || 0) + originalItem.quantidade;
+              });
+              adjustedStock = {};
+              Object.entries(productsDatabase).forEach(([code, prod]) => {
+                adjustedStock[code] = prod.estoque + (oldQuantities[code] || 0);
+              });
+              selectedClient = item.clienteId || "";
+              document.getElementById("selectClientSale").value = selectedClient;
+              updateActiveSaleDisplay();
+              updateProductSelection();
+              alert("Editando venda com produtos. Adicione ou remova itens e finalize.");
+            } else {
+              document.getElementById("valorTotal").value = item.valorTotal;
+              document.getElementById("tipoPagamento").value = item.tipoPagamento;
+              document.getElementById("observacoes").value = item.observacoes || "";
+              document.getElementById("selectClientManualSale").value = item.clienteId || "";
+              editId = id;
+            }
           }
         }, { onlyOnce: true });
       }
     };
 
     window.excluirVenda = id => {
-      if (confirm("Excluir esta venda?")) {
+      if (confirm("Excluir esta venda? O estoque será ajustado de volta.")) {
         const user = auth.currentUser;
         if (user) {
-          remove(ref(db, `vendas/${user.uid}/${id}`))
-            .then(() => {
-              alert("Venda excluída!");
-              loadAllSalesAndFilter(user.uid);
-            })
-            .catch(err => alert("Erro ao excluir: " + err.message));
+          const saleRef = ref(db, `vendas/${user.uid}/${id}`);
+          onValue(saleRef, snapshot => {
+            if (snapshot.exists()) {
+              const sale = snapshot.val();
+              const updates = {};
+              if (sale.items && sale.items.length > 0) {
+                const quantities = {};
+                sale.items.forEach(item => {
+                  const code = getProductCode(item.codigo);
+                  quantities[code] = (quantities[code] || 0) + item.quantidade;
+                });
+                Object.entries(quantities).forEach(([code, qty]) => {
+                  const currentStock = productsDatabase[code]?.estoque || 0;
+                  updates[`produtos/${user.uid}/${code}/estoque`] = currentStock + qty;
+                });
+              }
+              update(ref(db), updates).then(() => {
+                remove(saleRef).then(() => {
+                  alert("Venda excluída! Estoque ajustado.");
+                  loadAllSalesAndFilter(user.uid);
+                  loadProductsFromDatabase();
+                });
+              }).catch(err => alert("Erro ao excluir: " + err.message));
+            }
+          }, { onlyOnce: true });
         }
       }
     };
