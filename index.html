@@ -444,7 +444,7 @@
     let clientsDatabase = {};
     let tempWeight = null;
     let appliedDiscount = 0;
-    let selectedCategory = "Todas";
+    let selectedCategory = "";
     let selectedClient = "";
     let isEditingSale = false;
     let originalItems = [];
@@ -561,7 +561,7 @@
         Object.entries(categoriesDatabase).map(([id, category]) =>
           `<option value="${id}">${category.nome}</option>`
         ).join('');
-      filterCategorySale.innerHTML = '<option value="Todas">Todas as Categorias</option>' +
+      filterCategorySale.innerHTML = '<option value="" selected>Selecione uma Categoria</option><option value="Todas">Todas as Categorias</option>' +
         Object.entries(categoriesDatabase).map(([id, category]) =>
           `<option value="${id}">${category.nome}</option>`
         ).join('');
@@ -901,6 +901,10 @@
 
     function updateProductSelection() {
       const productSelectionDiv = document.getElementById("productSelection");
+      if (!selectedCategory) {
+        productSelectionDiv.innerHTML = "<p>Selecione uma categoria para visualizar os produtos.</p>";
+        return;
+      }
       const filteredProducts = selectedCategory === "Todas" ?
         Object.entries(productsDatabase) :
         Object.entries(productsDatabase).filter(([_, product]) => product.categoria === selectedCategory);
