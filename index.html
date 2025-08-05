@@ -1290,7 +1290,11 @@
         doc.setFontSize(8);
         doc.text("Endereço: Av. Nápoles, 57 - Rio Doce (Em frente à Igreja Maranata)", doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
         yPos += 5;
-        doc.text("WhatsApp: (81) 98904-2431", doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
+        const whatsappText = "ClIQUE NO NÚMERO DO WHATSAPP: (81) 98904-2431";
+        const textWidth = doc.getTextWidth(whatsappText);
+        const centerX = (doc.internal.pageSize.getWidth() - textWidth) / 2;
+        doc.text(whatsappText, centerX, yPos, { align: 'left' });
+        doc.link(centerX, yPos - 5, textWidth, 8, { url: 'https://wa.me/5581989042431' });
         doc.save(`venda_${new Date(sale.dataVenda).getTime()}.pdf`);
       });
     }
