@@ -974,6 +974,30 @@
       }));
       updateActiveSaleDisplay();
     };
+    window.adjustActiveItemQuantity = (numero, delta) => {
+      const itemIndex = activeSaleItems.findIndex(item => item.numero === numero);
+      if (itemIndex === -1) return;
+      const item = activeSaleItems[itemIndex];
+      if (item.unidade === 'kilo') return;
+      let newQty = item.quantidade + delta;
+      const productCode = getProductCode(item.codigo);
+      const effectiveStock = isEditingSale ? (adjustedStock[productCode] || productsDatabase[productCode].estoque) : productsDatabase[productCode].estoque;
+      if (newQty > effectiveStock) {
+        alert("Quantidade excede o estoque disponível (ajustado).");
+        return;
+      }
+      if (newQty <= 0) {
+        removeItemFromActiveSale(numero);
+        return;
+      }
+      item.quantidade = newQty;
+      item.preco = productsDatabase[productCode].preco * newQty;
+      activeSaleItems[itemIndex] = item;
+      updateActiveSaleDisplay();
+      if (document.getElementById(`qty-${item.codigo}`)) {
+        document.getElementById(`qty-${item.codigo}`).value = newQty;
+      }
+    };
     function updateActiveSaleDisplay() {
       const itemListDiv = document.getElementById("activeSaleItems");
       const total = activeSaleItems.reduce((sum, item) => sum + item.preco, 0);
@@ -981,7 +1005,15 @@
         "<p>Nenhum item adicionado.</p>" :
         activeSaleItems.map(item => `
           <div class="sale-item">
-            <span>${item.numero}. ${item.nome} (${item.unidade === 'kilo' ? (item.quantidade * 1000).toFixed(0) + 'g' : item.quantidade + ' un'}) - R$ ${item.preco.toFixed(2).replace('.', ',')}</span>
+            <span>${item.numero}. ${item.nome}</span>
+            ${item.unidade !== 'kilo' ? `
+              <div class="quantity-controls">
+                <button onclick="adjustActiveItemQuantity(${item.numero}, -1)">−</button>
+                <span>${item.quantidade} un</span>
+                <button onclick="adjustActiveItemQuantity(${item.numero}, 1)">+</button>
+              </div>
+            ` : `<span>${(item.quantidade * 1000).toFixed(0)}g</span>` }
+            <span> - R$ ${item.preco.toFixed(2).replace('.', ',')}</span>
             <button class="remove-item-btn" onclick="removeItemFromActiveSale(${item.numero})">X</button>
           </div>
         `).join('');
@@ -1254,6 +1286,11 @@
           yPos += 7;
         }
         doc.text("Obrigado!", doc.internal.pageSize.getWidth() / 2, yPos + 7, { align: 'center' });
+        yPos += 14;
+        doc.setFontSize(8);
+        doc.text("Endereço: Av. Nápoles, 57 - Rio Doce (Em frente à Igreja Maranata)", doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
+        yPos += 5;
+        doc.text("WhatsApp: (81) 98904-2431", doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
         doc.save(`venda_${new Date(sale.dataVenda).getTime()}.pdf`);
       });
     }
