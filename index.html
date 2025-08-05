@@ -14,29 +14,24 @@
       box-sizing: border-box;
       font-family: Arial, sans-serif;
     }
-
     body {
       background-color: #f5f5f5;
       padding: 10px;
       font-size: 14px;
     }
-
     header {
       text-align: center;
       margin-bottom: 20px;
     }
-
     header img {
       max-width: 150px;
       height: auto;
     }
-
     h3 {
       font-size: 1.2em;
       margin: 15px 0 10px;
       color: #333;
     }
-
     input, select, button, textarea {
       width: 100%;
       padding: 10px;
@@ -45,7 +40,6 @@
       border-radius: 5px;
       font-size: 1em;
     }
-
     button {
       background-color: #007bff;
       color: white;
@@ -53,22 +47,18 @@
       cursor: pointer;
       transition: background-color 0.3s;
     }
-
     button:hover {
       background-color: #0056b3;
     }
-
     button:disabled {
       background-color: #ccc;
       cursor: not-allowed;
     }
-
     .filters {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-
     .modal {
       display: none;
       position: fixed;
@@ -79,7 +69,6 @@
       background-color: rgba(0, 0, 0, 0.5);
       z-index: 1000;
     }
-
     .modal-content {
       background-color: white;
       margin: 10% auto;
@@ -89,7 +78,6 @@
       border-radius: 8px;
       position: relative;
     }
-
     .close-button {
       position: absolute;
       top: 10px;
@@ -97,7 +85,6 @@
       font-size: 1.5em;
       cursor: pointer;
     }
-
     .client-list-item, .category-list-item, .sale-item {
       display: flex;
       justify-content: space-between;
@@ -108,13 +95,11 @@
       border-radius: 5px;
       margin-bottom: 5px;
     }
-
     .client-list-item button, .category-list-item button, .sale-item button {
       padding: 8px;
       font-size: 0.9em;
       margin-left: 5px;
     }
-
     .client-sales {
       background-color: #f9f9f9;
       padding: 10px;
@@ -122,7 +107,6 @@
       margin-top: 5px;
       font-size: 0.9em;
     }
-
     .product-card {
       background-color: white;
       padding: 10px;
@@ -130,93 +114,75 @@
       margin-bottom: 10px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-
     .quantity-controls {
       display: flex;
       gap: 10px;
       align-items: center;
       margin-top: 10px;
     }
-
     .quantity-controls input {
       width: 60px;
       text-align: center;
     }
-
     .quantity-controls button {
       width: 40px;
       height: 40px;
       font-size: 1.2em;
     }
-
     .total-sales, #currentSaleTotal {
       font-weight: bold;
       margin: 10px 0;
       font-size: 1.1em;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
     }
-
     th, td {
       padding: 8px;
       text-align: left;
       border-bottom: 1px solid #eee;
       font-size: 0.9em;
     }
-
     th {
       background-color: #007bff;
       color: white;
     }
-
     .low-stock {
       background-color: #ffe6e6;
     }
-
     .hidden-section {
       display: none !important;
     }
-
     @media (max-width: 600px) {
       body {
         padding: 5px;
         font-size: 12px;
       }
-
       h3 {
         font-size: 1.1em;
       }
-
       input, select, button, textarea {
         font-size: 0.9em;
         padding: 8px;
       }
-
       .client-list-item span, .category-list-item span, .sale-item span {
         font-size: 0.9em;
       }
-
       .client-list-item button, .category-list-item button, .sale-item button {
         font-size: 0.8em;
         padding: 6px;
       }
-
       .product-card h4 {
         font-size: 1em;
       }
-
       .product-card p {
         font-size: 0.9em;
       }
-
       .quantity-controls input {
         width: 50px;
       }
-
       .quantity-controls button {
         width: 35px;
         height: 35px;
@@ -230,7 +196,6 @@
       <img src="https://pbs.twimg.com/media/GxNeFuNXYAA_PVA?format=jpg&name=large" alt="Batavo Logo">
     </a>
   </header>
-
   <div id="authSection">
     <h3>Login / Cadastro</h3>
     <input type="email" id="email" placeholder="Email">
@@ -238,7 +203,6 @@
     <button id="registerBtn">Cadastrar</button>
     <button id="loginBtn">Entrar</button>
   </div>
-
   <div id="saleSection" style="display:none;">
     <button id="logoutBtn">Sair</button>
     <button id="toggleSectionsBtn">Modo Simplificado</button>
@@ -265,7 +229,6 @@
       <button id="finalizarVendaBtn" disabled>Finalizar Venda</button>
       <button id="cancelSaleBtn">Cancelar Venda</button>
     </div>
-
     <div id="paymentModal" class="modal">
       <div class="modal-content">
         <span class="close-button">×</span>
@@ -293,7 +256,6 @@
         <button id="confirmPaymentBtn">Confirmar Pagamento</button>
       </div>
     </div>
-
     <hr class="section-divider">
     <h3 class="section-title">Gerenciar Categorias</h3>
     <input type="text" id="newCategoryName" placeholder="Nome da Categoria">
@@ -301,7 +263,6 @@
     <div id="categoryList">
       <p>Nenhuma categoria cadastrada.</p>
     </div>
-
     <hr class="section-divider">
     <h3 class="section-title">Gerenciar Clientes</h3>
     <input type="text" id="newClientName" placeholder="Nome do Cliente">
@@ -312,7 +273,6 @@
     <div id="clientList">
       <p>Nenhum cliente cadastrado.</p>
     </div>
-
     <hr class="section-divider">
     <h3 class="section-title">Cadastrar Produto</h3>
     <input type="text" id="newProductBarcode" placeholder="Código de Barras">
@@ -327,14 +287,12 @@
     </select>
     <input type="number" id="newProductStock" placeholder="Estoque (un/kg)" step="0.001">
     <button id="addProductBtn">Salvar Produto</button>
-
     <hr class="section-divider">
     <h3>Produtos</h3>
     <button id="toggleProductListBtn">Mostrar Produtos</button>
     <div id="productList" style="display:none;">
       <p>Nenhum produto cadastrado.</p>
     </div>
-
     <hr class="section-divider">
     <h3 class="section-title">Venda Manual</h3>
     <input type="datetime-local" id="dataVenda" required>
@@ -351,7 +309,6 @@
     </select>
     <textarea id="observacoes" placeholder="Observações"></textarea>
     <button id="submitSale">Salvar Venda</button>
-
     <hr class="section-divider">
     <h3 class="section-title">Filtrar Vendas</h3>
     <div class="filters">
@@ -370,37 +327,31 @@
       </select>
       <button id="applyFiltersBtn">Filtrar</button>
     </div>
-
     <hr class="section-divider">
     <h3 class="section-title">Lista de Clientes</h3>
     <div id="clientSalesList">
       <p>Nenhum cliente cadastrado.</p>
     </div>
-
     <hr class="section-divider">
     <h3 class="section-title">Ranking de Produtos</h3>
     <div id="rankingList">
       <p>Nenhum dado de vendas.</p>
     </div>
     <button id="exportRankingPdfBtn">Baixar Ranking (PDF)</button>
-
     <hr class="section-divider">
     <h3 class="section-title">Exportar Relatórios</h3>
     <button id="exportPdfBtn">Vendas (PDF)</button>
     <button id="exportExcelBtn">Vendas (Excel)</button>
     <button id="exportStockPdfBtn">Estoque (PDF)</button>
-
     <hr class="section-divider">
     <h3 class="section-title">Enviar Relatório</h3>
     <input type="text" id="phoneNumber" placeholder="Número (Ex: 5511987654321)">
     <button id="sendReportBtn">Enviar Relatório</button>
-
     <hr class="section-divider">
     <h3 class="section-title">Suas Vendas</h3>
     <div class="total-sales">Total: <span id="totalSalesValue">R$ 0,00</span></div>
     <div id="saleList"></div>
   </div>
-
   <script type="module">
     import {
       initializeApp
@@ -421,7 +372,6 @@
       onValue,
       remove
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
     const firebaseConfig = {
       apiKey: "AIzaSyDJBdK9I-jtg9ujTc9Xsxr-hnPfkId4wIU",
       authDomain: "pdv1-77632.firebaseapp.com",
@@ -432,11 +382,9 @@
       appId: "1:246033791117:web:7b70b511ea8d8c5ba1cac4",
       measurementId: "G-NTG13SG6VM"
     };
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth();
     const db = getDatabase();
-
     let editId = null;
     let allSalesData = [];
     let filteredSalesData = [];
@@ -452,14 +400,11 @@
     let originalItems = [];
     let editingSaleData = null;
     let adjustedStock = {};
-
     document.getElementById("barcodeInput").focus();
-
     // Função para alternar visibilidade das seções
     document.getElementById("toggleSectionsBtn").onclick = () => {
       const toggleBtn = document.getElementById("toggleSectionsBtn");
       const isSimplified = toggleBtn.textContent === "Modo Simplificado";
-
       // Seções a serem ocultadas no modo simplificado
       const sections = document.querySelectorAll(".section-title, .section-divider");
       sections.forEach(section => {
@@ -478,11 +423,9 @@
           }
         }
       });
-
       // Atualizar texto do botão
       toggleBtn.textContent = isSimplified ? "Modo Completo" : "Modo Simplificado";
     };
-
     function updateDataVenda() {
       const now = new Date();
       const year = now.getFullYear();
@@ -492,11 +435,9 @@
       const minutes = String(now.getMinutes()).padStart(2, '0');
       document.getElementById("dataVenda").value = `${year}-${month}-${day}T${hours}:${minutes}`;
     }
-
     function getProductCode(barcode) {
       return barcode.startsWith('2') && barcode.length === 13 ? barcode.slice(1, 7) : barcode;
     }
-
     // Autenticação
     document.getElementById("registerBtn").onclick = () => {
       const email = document.getElementById("email").value;
@@ -505,7 +446,6 @@
         .then(() => alert("Usuário registrado!"))
         .catch(err => alert(err.message));
     };
-
     document.getElementById("loginBtn").onclick = () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
@@ -518,11 +458,9 @@
         })
         .catch(err => alert(err.message));
     };
-
     document.getElementById("logoutBtn").onclick = () => {
       signOut(auth);
     };
-
     onAuthStateChanged(auth, user => {
       if (user) {
         document.getElementById("authSection").style.display = "none";
@@ -541,7 +479,6 @@
         document.getElementById("saleSection").style.display = "none";
       }
     });
-
     // Gerenciamento de Categorias
     function loadCategoriesFromDatabase() {
       const user = auth.currentUser;
@@ -555,7 +492,6 @@
         }, { onlyOnce: false });
       }
     }
-
     function updateCategorySelect() {
       const categorySelect = document.getElementById("newProductCategory");
       const filterCategorySale = document.getElementById("filterCategorySale");
@@ -568,7 +504,6 @@
           `<option value="${id}">${category.nome}</option>`
         ).join('');
     }
-
     function displayCategories() {
       const categoryListDiv = document.getElementById("categoryList");
       categoryListDiv.innerHTML = Object.keys(categoriesDatabase).length === 0 ?
@@ -583,7 +518,6 @@
           </div>
         `).join('');
     }
-
     document.getElementById("addCategoryBtn").onclick = () => {
       const categoryName = document.getElementById("newCategoryName").value.trim();
       if (!categoryName) {
@@ -605,7 +539,6 @@
           .catch(err => alert("Erro ao salvar categoria: " + err.message));
       }
     };
-
     window.editCategory = id => {
       const category = categoriesDatabase[id];
       if (category) {
@@ -614,7 +547,6 @@
         document.getElementById("addCategoryBtn").textContent = "Atualizar Categoria";
       }
     };
-
     window.deleteCategory = id => {
       if (confirm(`Excluir categoria ${categoriesDatabase[id].nome}?`)) {
         const user = auth.currentUser;
@@ -630,7 +562,6 @@
         }
       }
     };
-
     // Gerenciamento de Clientes
     function loadClientsFromDatabase() {
       const user = auth.currentUser;
@@ -643,7 +574,6 @@
         }, { onlyOnce: false });
       }
     }
-
     function updateClientSelect() {
       const selectClientSale = document.getElementById("selectClientSale");
       const selectClientManualSale = document.getElementById("selectClientManualSale");
@@ -659,7 +589,6 @@
           `<option value="${id}">${client.nome}</option>`
         ).join('');
     }
-
     function displayClients() {
       const clientListDiv = document.getElementById("clientList");
       clientListDiv.innerHTML = Object.keys(clientsDatabase).length === 0 ?
@@ -673,7 +602,6 @@
             </div>
           </div>
         `).join('');
-
       const clientSalesListDiv = document.getElementById("clientSalesList");
       clientSalesListDiv.innerHTML = Object.keys(clientsDatabase).length === 0 ?
         "<p>Nenhum cliente cadastrado.</p>" :
@@ -686,7 +614,7 @@
                 Telefone: ${client.telefone || 'N/A'} | Email: ${client.email || 'N/A'}
                 <div class="client-sales">
                   <strong>Vendas (${clientSales.length}):</strong>
-                  ${clientSales.length === 0 ? '<p>Nenhuma venda associada.</p>' : 
+                  ${clientSales.length === 0 ? '<p>Nenhuma venda associada.</p>' :
                     clientSales.map(sale => `
                       <div>
                         Data: ${new Date(sale.dataVenda).toLocaleString('pt-BR')}<br>
@@ -702,18 +630,15 @@
           `;
         }).join('');
     }
-
     document.getElementById("addClientBtn").onclick = () => {
       const name = document.getElementById("newClientName").value.trim();
       const cpfCnpj = document.getElementById("newClientCpfCnpj").value.trim();
       const phone = document.getElementById("newClientPhone").value.trim();
       const email = document.getElementById("newClientEmail").value.trim();
-
       if (!name || !cpfCnpj) {
         alert("Preencha nome e CPF/CNPJ do cliente.");
         return;
       }
-
       const user = auth.currentUser;
       if (user) {
         const clientRef = editId ?
@@ -738,7 +663,6 @@
           .catch(err => alert("Erro ao salvar cliente: " + err.message));
       }
     };
-
     window.editClient = id => {
       const client = clientsDatabase[id];
       if (client) {
@@ -750,7 +674,6 @@
         document.getElementById("addClientBtn").textContent = "Atualizar Cliente";
       }
     };
-
     window.deleteClient = id => {
       if (confirm(`Excluir cliente ${clientsDatabase[id].nome}?`)) {
         const user = auth.currentUser;
@@ -766,7 +689,6 @@
         }
       }
     };
-
     // Produtos
     function loadProductsFromDatabase() {
       const user = auth.currentUser;
@@ -780,7 +702,6 @@
         }, { onlyOnce: false });
       }
     }
-
     document.getElementById("addProductBtn").onclick = () => {
       const barcode = document.getElementById("newProductBarcode").value.trim();
       const name = document.getElementById("newProductName").value.trim();
@@ -788,17 +709,14 @@
       const unit = document.getElementById("newProductUnit").value;
       const category = document.getElementById("newProductCategory").value;
       const stock = parseFloat(document.getElementById("newProductStock").value) || 0;
-
       if (!barcode || !name || isNaN(price) || price <= 0 || !category) {
         alert("Preencha todos os campos do produto, incluindo a categoria.");
         return;
       }
-
       if (stock < 0) {
         alert("Estoque não pode ser negativo.");
         return;
       }
-
       const user = auth.currentUser;
       if (user) {
         const productRef = ref(db, `produtos/${user.uid}/${barcode}`);
@@ -822,7 +740,6 @@
         }, { onlyOnce: true });
       }
     };
-
     function resetProductForm() {
       document.getElementById("newProductBarcode").value = "";
       document.getElementById("newProductName").value = "";
@@ -833,7 +750,6 @@
       document.getElementById("newProductBarcode").disabled = false;
       document.getElementById("addProductBtn").textContent = "Salvar Produto";
     }
-
     function displayProducts() {
       const productListDiv = document.getElementById("productList");
       productListDiv.innerHTML = Object.keys(productsDatabase).length === 0 ?
@@ -868,7 +784,6 @@
            </tbody>
          </table>`;
     }
-
     window.editProduct = barcode => {
       const product = productsDatabase[barcode];
       if (product) {
@@ -882,7 +797,6 @@
         document.getElementById("addProductBtn").textContent = "Atualizar Produto";
       }
     };
-
     window.deleteProduct = barcode => {
       if (confirm(`Excluir produto com código ${barcode}?`)) {
         const user = auth.currentUser;
@@ -893,14 +807,12 @@
         }
       }
     };
-
     document.getElementById("toggleProductListBtn").onclick = () => {
       const productListDiv = document.getElementById("productList");
       const toggleBtn = document.getElementById("toggleProductListBtn");
       productListDiv.style.display = productListDiv.style.display === "none" ? "block" : "none";
       toggleBtn.textContent = productListDiv.style.display === "none" ? "Mostrar Produtos" : "Ocultar Produtos";
     };
-
     function updateProductSelection() {
       const productSelectionDiv = document.getElementById("productSelection");
       if (!selectedCategory) {
@@ -910,10 +822,8 @@
       const filteredProducts = selectedCategory === "Todas" ?
         Object.entries(productsDatabase) :
         Object.entries(productsDatabase).filter(([_, product]) => product.categoria === selectedCategory);
-
       // Ordenar produtos por nome em ordem alfabética
       filteredProducts.sort((a, b) => a[1].nome.localeCompare(b[1].nome, 'pt-BR'));
-
       productSelectionDiv.innerHTML = filteredProducts.length === 0 ?
         "<p>Nenhum produto encontrado para esta categoria.</p>" :
         filteredProducts.map(([barcode, product]) => `
@@ -929,7 +839,6 @@
           </div>
         `).join('');
     }
-
     window.adjustQuantity = (barcode, delta) => {
       const input = document.getElementById(`qty-${barcode}`);
       const product = productsDatabase[barcode];
@@ -944,13 +853,10 @@
       input.value = newQty.toFixed(product.unidade === 'kilo' ? 3 : 0);
       updateActiveSaleFromSelection(barcode, newQty);
     };
-
     function updateActiveSaleFromSelection(barcode, quantidade) {
       const product = productsDatabase[barcode];
       if (!product) return;
-
       activeSaleItems = activeSaleItems.filter(item => item.codigo !== barcode);
-
       if (quantidade > 0) {
         const preco = product.preco * quantidade;
         activeSaleItems.push({
@@ -963,10 +869,8 @@
           categoria: product.categoria
         });
       }
-
       updateActiveSaleDisplay();
     }
-
     document.getElementById("barcodeInput").addEventListener("keypress", function(event) {
       if (event.key === "Enter") {
         event.preventDefault();
@@ -1009,13 +913,11 @@
         }
       }
     });
-
     function addItemToActiveSale(barcode, quantidade = 1) {
       let product = productsDatabase[barcode];
       let preco;
       const productCode = getProductCode(barcode);
       const effectiveStock = isEditingSale ? (adjustedStock[productCode] || (productsDatabase[productCode] ? productsDatabase[productCode].estoque : 0)) : (productsDatabase[productCode] ? productsDatabase[productCode].estoque : 0);
-
       if (tempWeight) {
         if (!product || product.unidade !== 'kilo') {
           alert(`Produto ${barcode} não encontrado ou não é por peso.`);
@@ -1043,12 +945,10 @@
         }
         preco = product.preco * quantidade;
       }
-
       if (quantidade > effectiveStock) {
         alert("Quantidade excede o estoque disponível (ajustado).");
         return;
       }
-
       activeSaleItems = activeSaleItems.filter(item => item.codigo !== barcode);
       activeSaleItems.push({
         numero: activeSaleItems.length + 1,
@@ -1063,7 +963,6 @@
       updateProductSelection();
       document.getElementById(`qty-${barcode}`).value = quantidade.toFixed(product.unidade === 'kilo' ? 3 : 0);
     }
-
     window.removeItemFromActiveSale = itemNumber => {
       const item = activeSaleItems.find(item => item.numero === itemNumber);
       if (item) {
@@ -1075,7 +974,6 @@
       }));
       updateActiveSaleDisplay();
     };
-
     function updateActiveSaleDisplay() {
       const itemListDiv = document.getElementById("activeSaleItems");
       const total = activeSaleItems.reduce((sum, item) => sum + item.preco, 0);
@@ -1090,17 +988,14 @@
       document.getElementById("currentSaleTotal").textContent = `Total: R$ ${total.toFixed(2).replace('.', ',')}`;
       document.getElementById("finalizarVendaBtn").disabled = activeSaleItems.length === 0;
     }
-
     document.getElementById("filterCategorySale").onchange = function() {
       selectedCategory = this.value;
       updateProductSelection();
     };
-
     document.getElementById("selectClientSale").onchange = function() {
       selectedClient = this.value;
       document.getElementById("modalClientName").textContent = selectedClient ? clientsDatabase[selectedClient]?.nome || "Sem Cliente" : "Sem Cliente";
     };
-
     document.getElementById("finalizarVendaBtn").onclick = () => {
       if (activeSaleItems.length === 0) {
         alert("Adicione itens à venda.");
@@ -1123,7 +1018,6 @@
       document.getElementById("paymentModal").style.display = "block";
       document.getElementById("amountGivenContainer").style.display = "none";
     };
-
     document.querySelector(".close-button").onclick = () => {
       document.getElementById("paymentModal").style.display = "none";
       tempWeight = null;
@@ -1133,18 +1027,15 @@
         cancelActiveSale();
       }
     };
-
     document.getElementById("modalPaymentType").onchange = function() {
       document.getElementById("amountGivenContainer").style.display = this.value === "Dinheiro" ? "block" : "none";
       document.getElementById("changeDue").textContent = "R$ 0,00";
       document.getElementById("amountGiven").value = "";
     };
-
     document.getElementById("discountInput").oninput = function() {
       const total = activeSaleItems.reduce((sum, item) => sum + item.preco, 0);
       const discountInput = this.value.trim();
       let discountValue = 0;
-
       if (discountInput) {
         if (discountInput.endsWith("%")) {
           const percentage = parseFloat(discountInput.slice(0, -1));
@@ -1164,7 +1055,6 @@
           }
         }
       }
-
       appliedDiscount = discountValue;
       const totalWithDiscount = total - discountValue;
       if (totalWithDiscount < 0) {
@@ -1175,7 +1065,6 @@
       } else {
         document.getElementById("modalTotalWithDiscount").textContent = `R$ ${totalWithDiscount.toFixed(2).replace('.', ',')}`;
       }
-
       if (document.getElementById("modalPaymentType").value === "Dinheiro") {
         const amountGiven = parseFloat(document.getElementById("amountGiven").value) || 0;
         const change = amountGiven - totalWithDiscount;
@@ -1183,7 +1072,6 @@
         document.getElementById("confirmPaymentBtn").disabled = amountGiven < totalWithDiscount;
       }
     };
-
     document.getElementById("amountGiven").oninput = function() {
       const total = activeSaleItems.reduce((sum, item) => sum + item.preco, 0);
       const totalWithDiscount = total - appliedDiscount;
@@ -1192,7 +1080,6 @@
       document.getElementById("changeDue").textContent = `R$ ${change.toFixed(2).replace('.', ',')}`;
       document.getElementById("confirmPaymentBtn").disabled = amountGiven < totalWithDiscount;
     };
-
     document.getElementById("confirmPaymentBtn").onclick = () => {
       const total = activeSaleItems.reduce((sum, item) => sum + item.preco, 0);
       const totalWithDiscount = total - appliedDiscount;
@@ -1200,17 +1087,14 @@
       const amountGiven = parseFloat(document.getElementById("amountGiven").value) || 0;
       const dataVenda = document.getElementById("dataVenda").value;
       const observacoes = document.getElementById("modalObservations").value.trim() || "Venda PDV";
-
       if (paymentType === "Dinheiro" && amountGiven < totalWithDiscount) {
         alert("Valor recebido insuficiente.");
         return;
       }
-
       if (!dataVenda) {
         alert("Preencha a data e hora da venda.");
         return;
       }
-
       const user = auth.currentUser;
       if (user) {
         const saleData = {
@@ -1231,21 +1115,17 @@
           })),
           observacoes
         };
-
         const updates = {};
-
         const oldQuantities = {};
         originalItems.forEach(item => {
           const code = getProductCode(item.codigo);
           oldQuantities[code] = (oldQuantities[code] || 0) + item.quantidade;
         });
-
         const newQuantities = {};
         activeSaleItems.forEach(item => {
           const code = getProductCode(item.codigo);
           newQuantities[code] = (newQuantities[code] || 0) + item.quantidade;
         });
-
         const allCodes = new Set([...Object.keys(oldQuantities), ...Object.keys(newQuantities)]);
         allCodes.forEach(code => {
           const delta = (newQuantities[code] || 0) - (oldQuantities[code] || 0);
@@ -1254,14 +1134,12 @@
             updates[`produtos/${user.uid}/${code}/estoque`] = currentStock - delta;
           }
         });
-
         let refToUse;
         if (isEditingSale) {
           refToUse = ref(db, `vendas/${user.uid}/${editId}`);
         } else {
           refToUse = push(ref(db, `vendas/${user.uid}`));
         }
-
         Promise.all([set(refToUse, saleData), update(ref(db), updates)])
           .then(() => {
             alert(isEditingSale ? "Venda atualizada!" : "Venda registrada!");
@@ -1281,14 +1159,12 @@
           .catch(err => alert("Erro ao registrar venda: " + err.message));
       }
     };
-
     document.getElementById("cancelSaleBtn").onclick = () => {
       if (confirm("Cancelar venda atual?")) {
         cancelActiveSale();
         alert("Venda cancelada.");
       }
     };
-
     function cancelActiveSale() {
       activeSaleItems = [];
       tempWeight = null;
@@ -1307,62 +1183,80 @@
         adjustedStock = {};
       }
     }
-
-    function printSaleReceipt(sale, amountGiven) {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      let yPos = 10;
-      const margin = 10;
-
-      doc.setFontSize(14);
-      doc.text("Batavo", doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
-      yPos += 7;
-      doc.setFontSize(10);
-      doc.text(`Data: ${new Date(sale.dataVenda).toLocaleString('pt-BR')}`, margin, yPos);
-      if (sale.clienteNome) {
-        yPos += 7;
-        doc.text(`Cliente: ${sale.clienteNome}`, margin, yPos);
-      }
-      yPos += 7;
-      doc.text("-".repeat(40), margin, yPos);
-      yPos += 7;
-
-      sale.items.forEach(item => {
-        const quantidadeDisplay = item.unidade === 'kilo' ? `${(item.quantidade * 1000).toFixed(0)}g` : `${item.quantidade} un`;
-        doc.text(`${item.numero}. ${item.nome} (${quantidadeDisplay})`, margin, yPos);
-        doc.text(`R$ ${item.preco.toFixed(2).replace('.', ',')}`, doc.internal.pageSize.getWidth() - margin, yPos, { align: 'right' });
-        yPos += 7;
-      });
-
-      doc.text("-".repeat(40), margin, yPos);
-      yPos += 7;
-      if (sale.desconto > 0) {
-        doc.text(`Subtotal: R$ ${sale.valorOriginal.toFixed(2).replace('.', ',')}`, margin, yPos);
-        yPos += 7;
-        doc.text(`Desconto: R$ ${sale.desconto.toFixed(2).replace('.', ',')}`, margin, yPos);
-        yPos += 7;
-      }
-      doc.text(`TOTAL: R$ ${sale.valorTotal.toFixed(2).replace('.', ',')}`, margin, yPos);
-      doc.text(`Pagamento: ${sale.tipoPagamento}`, margin, yPos + 7);
-      yPos += 14;
-
-      if (sale.tipoPagamento === "Dinheiro") {
-        const change = amountGiven - sale.valorTotal;
-        doc.text(`Valor Recebido: R$ ${amountGiven.toFixed(2).replace('.', ',')}`, margin, yPos);
-        yPos += 7;
-        doc.text(`Troco: R$ ${change.toFixed(2).replace('.', ',')}`, margin, yPos);
-        yPos += 7;
-      }
-
-      if (sale.observacoes && sale.observacoes !== "Venda PDV") {
-        doc.text(`Obs.: ${sale.observacoes}`, margin, yPos);
-        yPos += 7;
-      }
-
-      doc.text("Obrigado!", doc.internal.pageSize.getWidth() / 2, yPos + 7, { align: 'center' });
-      doc.save(`venda_${new Date(sale.dataVenda).getTime()}.pdf`);
+    function getBase64Image(url, callback) {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        canvas.width = this.width;
+        canvas.height = this.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(this, 0, 0);
+        const dataURL = canvas.toDataURL('image/jpeg');
+        callback(dataURL);
+      };
+      img.onerror = function() {
+        console.error('Erro ao carregar a imagem. Verifique CORS ou use base64 manualmente.');
+        callback(null); // Continua sem imagem em caso de erro
+      };
+      img.src = url;
     }
-
+    function printSaleReceipt(sale, amountGiven) {
+      const logoUrl = 'https://pbs.twimg.com/media/GxNeFuNXYAA_PVA?format=jpg&name=large';
+      getBase64Image(logoUrl, (imgData) => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const margin = 10;
+        let yPos = 10;
+        if (imgData) {
+          doc.addImage(imgData, 'JPEG', (doc.internal.pageSize.getWidth() - 50) / 2, yPos, 50, 50); // Logo centralizada, tamanho 50x50
+          yPos += 55; // Espaço após a logo
+        } else {
+          doc.setFontSize(14);
+          doc.text("Batavo", doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
+          yPos += 7;
+        }
+        doc.setFontSize(10);
+        doc.text(`Data: ${new Date(sale.dataVenda).toLocaleString('pt-BR')}`, margin, yPos);
+        if (sale.clienteNome) {
+          yPos += 7;
+          doc.text(`Cliente: ${sale.clienteNome}`, margin, yPos);
+        }
+        yPos += 7;
+        doc.text("-".repeat(40), margin, yPos);
+        yPos += 7;
+        sale.items.forEach(item => {
+          const quantidadeDisplay = item.unidade === 'kilo' ? `${(item.quantidade * 1000).toFixed(0)}g` : `${item.quantidade} un`;
+          doc.text(`${item.numero}. ${item.nome} (${quantidadeDisplay})`, margin, yPos);
+          doc.text(`R$ ${item.preco.toFixed(2).replace('.', ',')}`, doc.internal.pageSize.getWidth() - margin, yPos, { align: 'right' });
+          yPos += 7;
+        });
+        doc.text("-".repeat(40), margin, yPos);
+        yPos += 7;
+        if (sale.desconto > 0) {
+          doc.text(`Subtotal: R$ ${sale.valorOriginal.toFixed(2).replace('.', ',')}`, margin, yPos);
+          yPos += 7;
+          doc.text(`Desconto: R$ ${sale.desconto.toFixed(2).replace('.', ',')}`, margin, yPos);
+          yPos += 7;
+        }
+        doc.text(`TOTAL: R$ ${sale.valorTotal.toFixed(2).replace('.', ',')}`, margin, yPos);
+        doc.text(`Pagamento: ${sale.tipoPagamento}`, margin, yPos + 7);
+        yPos += 14;
+        if (sale.tipoPagamento === "Dinheiro") {
+          const change = amountGiven - sale.valorTotal;
+          doc.text(`Valor Recebido: R$ ${amountGiven.toFixed(2).replace('.', ',')}`, margin, yPos);
+          yPos += 7;
+          doc.text(`Troco: R$ ${change.toFixed(2).replace('.', ',')}`, margin, yPos);
+          yPos += 7;
+        }
+        if (sale.observacoes && sale.observacoes !== "Venda PDV") {
+          doc.text(`Obs.: ${sale.observacoes}`, margin, yPos);
+          yPos += 7;
+        }
+        doc.text("Obrigado!", doc.internal.pageSize.getWidth() / 2, yPos + 7, { align: 'center' });
+        doc.save(`venda_${new Date(sale.dataVenda).getTime()}.pdf`);
+      });
+    }
     document.getElementById("submitSale").onclick = () => {
       updateDataVenda();
       const valorTotal = parseFloat(document.getElementById("valorTotal").value) || 0;
@@ -1370,12 +1264,10 @@
       const observacoes = document.getElementById("observacoes").value;
       const dataVenda = document.getElementById("dataVenda").value;
       const clientId = document.getElementById("selectClientManualSale").value;
-
       if (valorTotal <= 0 || !dataVenda) {
         alert("Preencha valor total e data da venda.");
         return;
       }
-
       const user = auth.currentUser;
       if (user) {
         const saleData = {
@@ -1399,7 +1291,6 @@
           .catch(err => alert("Erro ao registrar venda: " + err.message));
       }
     };
-
     function loadAllSalesAndFilter(uid) {
       const vendasRef = ref(db, `vendas/${uid}`);
       onValue(vendasRef, snapshot => {
@@ -1413,7 +1304,6 @@
         displayClients();
       });
     }
-
     function applyFiltersAndDisplaySales() {
       const container = document.getElementById("saleList");
       let currentTotalSales = 0;
@@ -1421,7 +1311,6 @@
       const filterDateEnd = document.getElementById("filterDateEnd").value ? new Date(document.getElementById("filterDateEnd").value + 'T23:59:59') : null;
       const filterPaymentType = document.getElementById("filterPaymentType").value;
       const filterClient = document.getElementById("filterClient").value;
-
       filteredSalesData = allSalesData.filter(sale => {
         const saleDate = new Date(sale.dataVenda);
         return (
@@ -1431,7 +1320,6 @@
           (filterClient === "Todos" || sale.clienteId === filterClient)
         );
       });
-
       container.innerHTML = filteredSalesData.length === 0 ?
         "Nenhuma venda encontrada." :
         filteredSalesData.map(item => {
@@ -1453,12 +1341,9 @@
             </div>
           `;
         }).join('');
-
       document.getElementById("totalSalesValue").textContent = `R$ ${currentTotalSales.toFixed(2).replace('.', ',')}`;
     }
-
     document.getElementById("applyFiltersBtn").onclick = applyFiltersAndDisplaySales;
-
     function updateRankingDisplay() {
       const rankingListDiv = document.getElementById("rankingList");
       const productSales = {};
@@ -1479,14 +1364,12 @@
           });
         }
       });
-
       const ranking = Object.entries(productSales)
         .map(([code, data]) => ({
           code,
           ...data
         }))
         .sort((a, b) => b.quantidade - a.quantidade);
-
       rankingListDiv.innerHTML = ranking.length === 0 ?
         "<p>Nenhum dado de vendas.</p>" :
         `<table>
@@ -1514,7 +1397,6 @@
            </tbody>
          </table>`;
     }
-
     document.getElementById("exportRankingPdfBtn").onclick = () => {
       const productSales = {};
       filteredSalesData.forEach(sale => {
@@ -1534,26 +1416,22 @@
           });
         }
       });
-
       const ranking = Object.entries(productSales)
         .map(([code, data]) => ({
           code,
           ...data
         }))
         .sort((a, b) => b.quantidade - a.quantidade);
-
       if (ranking.length === 0) {
         alert("Não há dados para exportar.");
         return;
       }
-
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       doc.setFontSize(16);
       doc.text("Ranking de Produtos", 10, 10);
       doc.setFontSize(10);
       doc.text(`Período: ${document.getElementById("filterDateStart").value || 'Início'} até ${document.getElementById("filterDateEnd").value || 'Hoje'}`, 10, 20);
-
       const tableColumn = ["Pos", "Código", "Nome", "Unidade", "Qtde Vendida", "Valor (R$)"];
       const tableRows = ranking.map((product, index) => [
         index + 1,
@@ -1563,7 +1441,6 @@
         product.unidade === 'kilo' ? `${(product.quantidade * 1000).toFixed(0)}g` : `${product.quantidade} un`,
         `R$ ${product.valorTotal.toFixed(2).replace('.', ',')}`
       ]);
-
       doc.autoTable({
         head: [tableColumn],
         body: tableRows,
@@ -1572,23 +1449,19 @@
         headStyles: { fillColor: [41, 128, 185], textColor: [255, 255, 255] },
         alternateRowStyles: { fillColor: [240, 240, 240] }
       });
-
       doc.save("ranking_produtos.pdf");
     };
-
     document.getElementById("exportStockPdfBtn").onclick = () => {
       if (Object.keys(productsDatabase).length === 0) {
         alert("Nenhum produto cadastrado.");
         return;
       }
-
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       doc.setFontSize(16);
       doc.text("Relatório de Estoque", 10, 10);
       doc.setFontSize(10);
       doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 10, 20);
-
       const tableColumn = ["Código", "Nome", "Preço (R$)", "Unidade", "Categoria", "Estoque"];
       const tableRows = Object.entries(productsDatabase).map(([barcode, product]) => [
         barcode,
@@ -1598,7 +1471,6 @@
         categoriesDatabase[product.categoria]?.nome || 'Sem categoria',
         `${(product.estoque || 0).toFixed(3).replace('.', ',')} ${product.unidade === 'kilo' ? 'kg' : 'un'}`
       ]);
-
       doc.autoTable({
         head: [tableColumn],
         body: tableRows,
@@ -1607,21 +1479,17 @@
         headStyles: { fillColor: [41, 128, 185], textColor: [255, 255, 255] },
         alternateRowStyles: { fillColor: [240, 240, 240] }
       });
-
       doc.save("estoque_atual.pdf");
     };
-
     document.getElementById("exportPdfBtn").onclick = () => {
       if (filteredSalesData.length === 0) {
         alert("Nenhuma venda para exportar.");
         return;
       }
-
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       doc.setFontSize(16);
       doc.text("Relatório de Vendas", 10, 10);
-
       const tableColumn = ["Data", "Cliente", "Valor", "Desconto", "Pagamento", "Obs", "Itens"];
       const tableRows = filteredSalesData.map(sale => [
         new Date(sale.dataVenda).toLocaleString('pt-BR'),
@@ -1634,7 +1502,6 @@
           sale.items.map(i => `${i.nome} (${i.unidade === 'kilo' ? (i.quantidade * 1000).toFixed(0) + 'g' : i.quantidade + ' un'}, R$ ${i.preco.toFixed(2).replace('.', ',')})`).join('\n') :
           'N/A'
       ]);
-
       doc.autoTable({
         head: [tableColumn],
         body: tableRows,
@@ -1643,16 +1510,13 @@
         headStyles: { fillColor: [41, 128, 185], textColor: [255, 255, 255] },
         alternateRowStyles: { fillColor: [240, 240, 240] }
       });
-
       doc.save("vendas_filtradas.pdf");
     };
-
     document.getElementById("exportExcelBtn").onclick = () => {
       if (filteredSalesData.length === 0) {
         alert("Nenhuma venda para exportar.");
         return;
       }
-
       const dataToExport = filteredSalesData.map(sale => ({
         "Data/Hora": new Date(sale.dataVenda).toLocaleString('pt-BR'),
         "Cliente": sale.clienteNome || 'Sem Cliente',
@@ -1663,20 +1527,17 @@
         "Itens": sale.items?.length > 0 ?
           sale.items.map(i => `${i.nome} (${i.unidade === 'kilo' ? (i.quantidade * 1000).toFixed(0) + 'g' : i.quantidade + ' un'}, R$ ${i.preco.toFixed(2).replace('.', ',')})`).join('; ') : ''
       }));
-
       const worksheet = XLSX.utils.json_to_sheet(dataToExport);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Vendas");
       XLSX.writeFile(workbook, "vendas.xlsx");
     };
-
     document.getElementById("sendReportBtn").onclick = () => {
       const phoneNumber = document.getElementById("phoneNumber").value.trim();
       if (!phoneNumber || filteredSalesData.length === 0) {
         alert("Insira um número ou verifique se há vendas para enviar.");
         return;
       }
-
       let reportMessage = "Relatório de Vendas:\n\n";
       filteredSalesData.forEach(sale => {
         reportMessage += `Data: ${new Date(sale.dataVenda).toLocaleString('pt-BR')}\n`;
@@ -1686,17 +1547,15 @@
         reportMessage += `Pagamento: ${sale.tipoPagamento}\n`;
         reportMessage += `Obs.: ${sale.observacoes || 'N/A'}\n`;
         if (sale.items?.length > 0) {
-          reportMessage += "Itens:\n" + sale.items.map(i => `  - ${i.nome} (${i.unidade === 'kilo' ? (i.quantidade * 1000).toFixed(0) + 'g' : i.quantidade + ' un'}, R$ ${i.preco.toFixed(2).replace('.', ',')})`).join('\n') + "\n";
+          reportMessage += "Itens:\n" + sale.items.map(i => ` - ${i.nome} (${i.unidade === 'kilo' ? (i.quantidade * 1000).toFixed(0) + 'g' : i.quantidade + ' un'}, R$ ${i.preco.toFixed(2).replace('.', ',')})`).join('\n') + "\n";
         }
         reportMessage += "----\n";
       });
       reportMessage += `Total: R$ ${filteredSalesData.reduce((acc, sale) => acc + sale.valorTotal, 0).toFixed(2).replace('.', ',')}`;
-
       if (confirm("Abrir WhatsApp com o relatório?")) {
         window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(reportMessage)}`, '_blank');
       }
     };
-
     window.editarVenda = id => {
       const user = auth.currentUser;
       if (user) {
@@ -1743,7 +1602,6 @@
         }, { onlyOnce: true });
       }
     };
-
     window.excluirVenda = id => {
       if (confirm("Excluir esta venda? O estoque será ajustado de volta.")) {
         const user = auth.currentUser;
@@ -1776,7 +1634,6 @@
         }
       }
     };
-
     function limparFormulario() {
       document.getElementById("valorTotal").value = "";
       document.getElementById("tipoPagamento").value = "Pix";
