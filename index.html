@@ -961,12 +961,19 @@
       });
       updateActiveSaleDisplay();
       updateProductSelection();
-      document.getElementById(`qty-${barcode}`).value = quantidade.toFixed(product.unidade === 'kilo' ? 3 : 0);
+      const qtyInput = document.getElementById(`qty-${productCode}`);
+      if (qtyInput) {
+        qtyInput.value = quantidade.toFixed(product.unidade === 'kilo' ? 3 : 0);
+      }
     }
     window.removeItemFromActiveSale = itemNumber => {
       const item = activeSaleItems.find(item => item.numero === itemNumber);
       if (item) {
-        document.getElementById(`qty-${item.codigo}`).value = "0";
+        const productCode = getProductCode(item.codigo);
+        const qtyInput = document.getElementById(`qty-${productCode}`);
+        if (qtyInput) {
+          qtyInput.value = "0";
+        }
       }
       activeSaleItems = activeSaleItems.filter(item => item.numero !== itemNumber).map((item, index) => ({
         ...item,
@@ -1257,12 +1264,19 @@
         yPos += 7;
         doc.text("-".repeat(40), margin, yPos);
         yPos += 7;
-        sale.items.forEach(item => {
+        const itemRows = sale.items.map(item => {
           const quantidadeDisplay = item.unidade === 'kilo' ? `${(item.quantidade * 1000).toFixed(0)}g` : `${item.quantidade} un`;
-          doc.text(`${item.numero}. ${item.nome} (${quantidadeDisplay})`, margin, yPos);
-          doc.text(`R$ ${item.preco.toFixed(2).replace('.', ',')}`, doc.internal.pageSize.getWidth() - margin, yPos, { align: 'right' });
-          yPos += 7;
+          return [`${item.numero}. ${item.nome} (${quantidadeDisplay})`, `R$ ${item.preco.toFixed(2).replace('.', ',')}`];
         });
+        doc.autoTable({
+          body: itemRows,
+          startY: yPos,
+          margin: { left: margin, right: margin },
+          styles: { cellPadding: 1, fontSize: 10, overflow: 'linebreak' },
+          columnStyles: { 0: { cellWidth: 'auto' }, 1: { cellWidth: 'auto', halign: 'right' } },
+          theme: 'plain'
+        });
+        yPos = doc.lastAutoTable.finalY + 5;
         doc.text("-".repeat(40), margin, yPos);
         yPos += 7;
         if (sale.desconto > 0) {
