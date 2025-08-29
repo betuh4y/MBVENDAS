@@ -260,7 +260,8 @@
     <h3 class="section-title">Gerenciar Categorias</h3>
     <input type="text" id="newCategoryName" placeholder="Nome da Categoria">
     <button id="addCategoryBtn">Salvar Categoria</button>
-    <div id="categoryList">
+    <button id="toggleCategoryListBtn">Mostrar Categorias</button>
+    <div id="categoryList" style="display:none;">
       <p>Nenhuma categoria cadastrada.</p>
     </div>
     <hr class="section-divider">
@@ -270,7 +271,8 @@
     <input type="text" id="newClientPhone" placeholder="Telefone (ex.: 5519987654321)">
     <input type="text" id="newClientEmail" placeholder="Email (opcional)">
     <button id="addClientBtn">Salvar Cliente</button>
-    <div id="clientList">
+    <button id="toggleClientListBtn">Mostrar Clientes</button>
+    <div id="clientList" style="display:none;">
       <p>Nenhum cliente cadastrado.</p>
     </div>
     <hr class="section-divider">
@@ -329,7 +331,8 @@
     </div>
     <hr class="section-divider">
     <h3 class="section-title">Lista de Clientes</h3>
-    <div id="clientSalesList">
+    <button id="toggleClientSalesListBtn">Mostrar Lista de Clientes</button>
+    <div id="clientSalesList" style="display:none;">
       <p>Nenhum cliente cadastrado.</p>
     </div>
     <hr class="section-divider">
@@ -1034,7 +1037,7 @@
     document.getElementById("selectClientSale").onchange = function() {
       selectedClient = this.value;
       document.getElementById("modalClientName").textContent = selectedClient ? clientsDatabase[selectedClient]?.nome || "Sem Cliente" : "Sem Cliente";
-    };
+    }
     document.getElementById("finalizarVendaBtn").onclick = () => {
       if (activeSaleItems.length === 0) {
         alert("Adicione itens à venda.");
@@ -1240,7 +1243,7 @@
       };
       img.src = url;
     }
-    function printSaleReceipt(sale, amountGiven) {
+   function printSaleReceipt(sale, amountGiven) {
       const logoUrl = 'https://pbs.twimg.com/media/GxNeFuNXYAA_PVA?format=jpg&name=large';
       getBase64Image(logoUrl, (imgData) => {
         const { jsPDF } = window.jspdf;
@@ -1696,6 +1699,27 @@
       document.getElementById("selectClientManualSale").value = "";
       updateDataVenda();
     }
+    // Toggle for categoryList
+    document.getElementById("toggleCategoryListBtn").onclick = () => {
+      const categoryListDiv = document.getElementById("categoryList");
+      const toggleBtn = document.getElementById("toggleCategoryListBtn");
+      categoryListDiv.style.display = categoryListDiv.style.display === "none" ? "block" : "none";
+      toggleBtn.textContent = categoryListDiv.style.display === "none" ? "Mostrar Categorias" : "Ocultar Categorias";
+    };
+    // Toggle for clientList
+    document.getElementById("toggleClientListBtn").onclick = () => {
+      const clientListDiv = document.getElementById("clientList");
+      const toggleBtn = document.getElementById("toggleClientListBtn");
+      clientListDiv.style.display = clientListDiv.style.display === "none" ? "block" : "none";
+      toggleBtn.textContent = clientListDiv.style.display === "none" ? "Mostrar Clientes" : "Ocultar Clientes";
+    };
+    // Toggle for clientSalesList
+    document.getElementById("toggleClientSalesListBtn").onclick = () => {
+      const clientSalesListDiv = document.getElementById("clientSalesList");
+      const toggleBtn = document.getElementById("toggleClientSalesListBtn");
+      clientSalesListDiv.style.display = clientSalesListDiv.style.display === "none" ? "block" : "none";
+      toggleBtn.textContent = clientSalesListDiv.style.display === "none" ? "Mostrar Lista de Clientes" : "Ocultar Lista de Clientes";
+    };
   </script>
 </body>
 </html>
