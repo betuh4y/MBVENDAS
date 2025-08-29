@@ -1251,19 +1251,19 @@
           doc.addImage(imgData, 'JPEG', (doc.internal.pageSize.getWidth() - 50) / 2, yPos, 50, 50); // Logo centralizada, tamanho 50x50
           yPos += 55; // Espaço após a logo
         } else {
-          doc.setFontSize(14);
+          doc.setFontSize(16);
           doc.text("Batavo", doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
-          yPos += 7;
+          yPos += 8;
         }
-        doc.setFontSize(10);
+        doc.setFontSize(12);
         doc.text(`Data: ${new Date(sale.dataVenda).toLocaleString('pt-BR')}`, margin, yPos);
         if (sale.clienteNome) {
-          yPos += 7;
+          yPos += 8;
           doc.text(`Cliente: ${sale.clienteNome}`, margin, yPos);
         }
-        yPos += 7;
+        yPos += 8;
         doc.text("-".repeat(40), margin, yPos);
-        yPos += 7;
+        yPos += 8;
         const itemRows = sale.items.map(item => {
           const quantidadeDisplay = item.unidade === 'kilo' ? `${(item.quantidade * 1000).toFixed(0)}g` : `${item.quantidade} un`;
           return [`${item.numero}. ${item.nome} (${quantidadeDisplay})`, `R$ ${item.preco.toFixed(2).replace('.', ',')}`];
@@ -1272,38 +1272,38 @@
           body: itemRows,
           startY: yPos,
           margin: { left: margin, right: margin },
-          styles: { cellPadding: 1, fontSize: 10, overflow: 'linebreak' },
+          styles: { cellPadding: 2, fontSize: 18, overflow: 'linebreak' },
           columnStyles: { 0: { cellWidth: 'auto' }, 1: { cellWidth: 'auto', halign: 'right' } },
           theme: 'plain'
         });
-        yPos = doc.lastAutoTable.finalY + 5;
+        yPos = doc.lastAutoTable.finalY + 6;
         doc.text("-".repeat(40), margin, yPos);
-        yPos += 7;
+        yPos += 8;
         if (sale.desconto > 0) {
           doc.text(`Subtotal: R$ ${sale.valorOriginal.toFixed(2).replace('.', ',')}`, margin, yPos);
-          yPos += 7;
+          yPos += 8;
           doc.text(`Desconto: R$ ${sale.desconto.toFixed(2).replace('.', ',')}`, margin, yPos);
-          yPos += 7;
+          yPos += 8;
         }
         doc.text(`TOTAL: R$ ${sale.valorTotal.toFixed(2).replace('.', ',')}`, margin, yPos);
-        doc.text(`Pagamento: ${sale.tipoPagamento}`, margin, yPos + 7);
-        yPos += 14;
+        doc.text(`Pagamento: ${sale.tipoPagamento}`, margin, yPos + 8);
+        yPos += 16;
         if (sale.tipoPagamento === "Dinheiro") {
           const change = amountGiven - sale.valorTotal;
           doc.text(`Valor Recebido: R$ ${amountGiven.toFixed(2).replace('.', ',')}`, margin, yPos);
-          yPos += 7;
+          yPos += 8;
           doc.text(`Troco: R$ ${change.toFixed(2).replace('.', ',')}`, margin, yPos);
-          yPos += 7;
+          yPos += 8;
         }
         if (sale.observacoes && sale.observacoes !== "Venda PDV") {
           doc.text(`Obs.: ${sale.observacoes}`, margin, yPos);
-          yPos += 7;
+          yPos += 8;
         }
-        doc.text("Obrigado!", doc.internal.pageSize.getWidth() / 2, yPos + 7, { align: 'center' });
-        yPos += 14;
-        doc.setFontSize(8);
+        doc.text("Obrigado!", doc.internal.pageSize.getWidth() / 2, yPos + 8, { align: 'center' });
+        yPos += 16;
+        doc.setFontSize(10);
         doc.text("Endereço: Av. Nápoles, 57 - Rio Doce (Em frente à Igreja Maranata)", doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
-        yPos += 5;
+        yPos += 6;
         const whatsappText = "ClIQUE NO NÚMERO DO WHATSAPP: (81) 98904-2431";
         const textWidth = doc.getTextWidth(whatsappText);
         const centerX = (doc.internal.pageSize.getWidth() - textWidth) / 2;
@@ -1689,7 +1689,7 @@
         }
       }
     };
-    function limparFormulario() {
+   function limparFormulario() {
       document.getElementById("valorTotal").value = "";
       document.getElementById("tipoPagamento").value = "Pix";
       document.getElementById("observacoes").value = "";
