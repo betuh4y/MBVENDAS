@@ -1255,7 +1255,7 @@
           doc.text("Batavo", doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
           yPos += 8;
         }
-        doc.setFontSize(12);
+        doc.setFontSize(16);
         doc.text(`Data: ${new Date(sale.dataVenda).toLocaleString('pt-BR')}`, margin, yPos);
         if (sale.clienteNome) {
           yPos += 8;
@@ -1272,7 +1272,7 @@
           body: itemRows,
           startY: yPos,
           margin: { left: margin, right: margin },
-          styles: { cellPadding: 2, fontSize: 18, overflow: 'linebreak' },
+          styles: { cellPadding: 2, fontSize: 16, overflow: 'linebreak' },
           columnStyles: { 0: { cellWidth: 'auto' }, 1: { cellWidth: 'auto', halign: 'right' } },
           theme: 'plain'
         });
