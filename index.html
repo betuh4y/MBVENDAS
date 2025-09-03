@@ -1254,11 +1254,11 @@
           doc.addImage(imgData, 'JPEG', (doc.internal.pageSize.getWidth() - 50) / 2, yPos, 50, 50); // Logo centralizada, tamanho 50x50
           yPos += 55; // Espaço após a logo
         } else {
-          doc.setFontSize(8);
+          doc.setFontSize(10);
           doc.text("Batavo", doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
           yPos += 8;
         }
-        doc.setFontSize(8);
+        doc.setFontSize(10);
         doc.text(`Data: ${new Date(sale.dataVenda).toLocaleString('pt-BR')}`, margin, yPos);
         if (sale.clienteNome) {
           yPos += 8;
@@ -1275,7 +1275,7 @@
           body: itemRows,
           startY: yPos,
           margin: { left: margin, right: margin },
-          styles: { cellPadding: 1, fontSize: 9, overflow: 'linebreak' },
+          styles: { cellPadding: 1, fontSize: 11, overflow: 'linebreak' },
           columnStyles: { 0: { cellWidth: 'auto' }, 1: { cellWidth: 'auto', halign: 'right' } },
           theme: 'plain'
         });
