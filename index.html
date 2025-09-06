@@ -699,6 +699,7 @@
         const produtosRef = ref(db, `produtos/${user.uid}`);
         onValue(produtosRef, snapshot => {
           productsDatabase = snapshot.exists() ? snapshot.val() : {};
+          console.log("Produtos carregados:", productsDatabase); // Adiciona log para depuração
           displayProducts();
           updateRankingDisplay();
           updateProductSelection();
@@ -755,37 +756,45 @@
     }
     function displayProducts() {
       const productListDiv = document.getElementById("productList");
-      productListDiv.innerHTML = Object.keys(productsDatabase).length === 0 ?
-        "<p>Nenhum produto cadastrado.</p>" :
-        `<table>
-           <thead>
-             <tr>
-               <th>Código</th>
-               <th>Nome</th>
-               <th>Preço</th>
-               <th>Unidade</th>
-               <th>Categoria</th>
-               <th>Estoque</th>
-               <th>Ações</th>
-             </tr>
-           </thead>
-           <tbody>
-             ${Object.entries(productsDatabase).map(([barcode, product]) => `
-               <tr class="${(product.estoque || 0) < (product.unidade === 'kilo' ? 0.1 : 1) ? 'low-stock' : ''}">
-                 <td>${barcode}</td>
-                 <td>${product.nome}</td>
-                 <td>R$ ${product.preco.toFixed(2).replace('.', ',')}</td>
-                 <td>${product.unidade === 'kilo' ? 'Kilo' : 'Unidade'}</td>
-                 <td>${categoriesDatabase[product.categoria]?.nome || 'Sem categoria'}</td>
-                 <td>${(product.estoque || 0).toFixed(3).replace('.', ',')} ${product.unidade === 'kilo' ? 'kg' : 'un'}</td>
-                 <td>
-                   <button onclick="editProduct('${barcode}')">Editar</button>
-                   <button onclick="deleteProduct('${barcode}')">Excluir</button>
-                 </td>
-               </tr>
-             `).join('')}
-           </tbody>
-         </table>`;
+      if (!productsDatabase || Object.keys(productsDatabase).length === 0) {
+        productListDiv.innerHTML = "<p>Nenhum produto cadastrado ou erro ao carregar produtos.</p>";
+        return;
+      }
+      productListDiv.innerHTML = `<table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Preço</th>
+            <th>Unidade</th>
+            <th>Categoria</th>
+            <th>Estoque</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${Object.entries(productsDatabase).map(([barcode, product]) => {
+            if (!product.nome || !product.preco || !product.unidade || !product.categoria) {
+              console.warn(`Produto com código ${barcode} possui dados incompletos:`, product);
+              return '';
+            }
+            return `
+              <tr class="${(product.estoque || 0) < (product.unidade === 'kilo' ? 0.1 : 1) ? 'low-stock' : ''}">
+                <td>${barcode}</td>
+                <td>${product.nome}</td>
+                <td>R$ ${product.preco.toFixed(2).replace('.', ',')}</td>
+                <td>${product.unidade === 'kilo' ? 'Kilo' : 'Unidade'}</td>
+                <td>${categoriesDatabase[product.categoria]?.nome || 'Sem categoria'}</td>
+                <td>${(product.estoque || 0).toFixed(3).replace('.', ',')} ${product.unidade === 'kilo' ? 'kg' : 'un'}</td>
+                <td>
+                  <button onclick="editProduct('${barcode}')">Editar</button>
+                  <button onclick="deleteProduct('${barcode}')">Excluir</button>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>`;
     }
     window.editProduct = barcode => {
       const product = productsDatabase[barcode];
@@ -815,6 +824,9 @@
       const toggleBtn = document.getElementById("toggleProductListBtn");
       productListDiv.style.display = productListDiv.style.display === "none" ? "block" : "none";
       toggleBtn.textContent = productListDiv.style.display === "none" ? "Mostrar Produtos" : "Ocultar Produtos";
+      if (productListDiv.style.display === "block") {
+        displayProducts(); // Garante que a lista seja atualizada ao exibir
+      }
     };
     function updateProductSelection() {
       const productSelectionDiv = document.getElementById("productSelection");
@@ -827,6 +839,7 @@
         Object.entries(productsDatabase).filter(([_, product]) => product.categoria === selectedCategory);
       // Ordenar produtos por nome em ordem alfabética
       filteredProducts.sort((a, b) => a[1].nome.localeCompare(b[1].nome, 'pt-BR'));
+      console.log("Produtos filtrados para seleção:", filteredProducts); // Adiciona log para depuração
       productSelectionDiv.innerHTML = filteredProducts.length === 0 ?
         "<p>Nenhum produto encontrado para esta categoria.</p>" :
         filteredProducts.map(([barcode, product]) => `
